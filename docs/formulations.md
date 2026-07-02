@@ -36,10 +36,10 @@ Auxiliary (defined by equality constraints, so the model stays LP):
 
 $$L_w = \sum_{d \in D} \sum_{b \in B} r_{db}\, h_{dbw} \qquad \text{(weekly TRIMP load)}$$
 
-$$\text{CTL}_w = \lambda_c\, \text{CTL}_{w-1} + (1-\lambda_c)\, L_w, \qquad
-\text{ATL}_w = \lambda_a\, \text{ATL}_{w-1} + (1-\lambda_a)\, L_w$$
+$$\text{CTL}_w = \lambda_c\, \text{CTL}_{w-1} + (1-\lambda_c)\, \frac{L_w}{7}, \qquad
+\text{ATL}_w = \lambda_a\, \text{ATL}_{w-1} + (1-\lambda_a)\, \frac{L_w}{7}$$
 
-Exponential smoothing is linear in the loads $L_w$, so the Banister dynamics enter the LP exactly — no approximation is needed beyond the weekly (rather than daily) time step.
+The division by 7 converts weekly TRIMP to average daily load, keeping CTL/ATL in the same daily-scale units as the data pipeline (so $\text{CTL}_0, \text{ATL}_0$ plug in directly). Exponential smoothing is linear in the loads $L_w$, so the Banister dynamics enter the LP exactly — no approximation is needed beyond the weekly (rather than daily) time step.
 
 ### Objective
 
@@ -57,7 +57,9 @@ $$\max \; p_T = k_1\, \text{CTL}_T - k_2\, \text{ATL}_T$$
 
 $$\sum_{d,b} h_{dbw} \le H^{\max}_w \quad \forall w \qquad \text{(weekly hours)}$$
 
-$$\sum_{b} h_{dbw} \ge h^{\min}_d \quad \forall d, w \qquad \text{(discipline minimums)}$$
+$$h^{\min}_d \le \sum_{b} h_{dbw} \le h^{\max}_d \quad \forall d, w \qquad \text{(discipline bounds)}$$
+
+The per-discipline upper bounds $h^{\max}_d$ reflect pool availability and injury risk, and bound the degeneracy of alternative optimal discipline mixes (many $(d,b)$ combinations yield equal TRIMP, so without them the LP returns arbitrary splits among alternative optima — discussed in the report).
 
 $$\sum_{d} \left( h_{d,\text{mod},w} + h_{d,\text{hard},w} \right) \le \pi \sum_{d,b} h_{dbw} \quad \forall w \qquad \text{(80/20 polarization)}$$
 
