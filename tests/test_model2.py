@@ -14,10 +14,12 @@ PROFILE = {
         "budget_eur": 2500,
         "max_races_per_month": 2,
         "recovery_weeks": {"sprint": 1, "olympic": 2, "70.3": 4},
-        "value_weights": {"points": 1.0, "strategic": 3.0, "preference": 2.0},
-        "preference_weights": {"course_quality": 0.4, "scenery": 0.3, "swim_quality": 0.3},
+        "value_weights": {"points": 1.0, "strategic": 3.0, "preference": 2.0, "fit": 2.0},
+        "preference_weights": {"organization": 0.3, "scenery": 0.3, "swim_quality": 0.4},
+        "terrain_preference": {"bike": "flat", "run": "flat"},
         "weather_risk_adjust": True,
         "vacation_days_budget": 12,
+        "require_a_race": True,
         "ctl_required": {"sprint": 60, "olympic": 75, "70.3": 90},
         "offseason_ctl": 60,
         "offseason_weekly_load": 400,
@@ -26,17 +28,18 @@ PROFILE = {
 }
 
 RACES = pd.DataFrame([
-    # id, name, date, week, class, fee, travel, days, pts, strat, course, scenery, swim, weather
-    ("A", "Early 70.3", "2027-03-07", 9, "70.3", 350, 700, 3, 85, 7, 6, 6, 8, 0.90),
-    ("B", "Home Sprint", "2027-03-14", 11, "sprint", 45, 0, 0, 20, 3, 6, 5, 6, 0.85),
-    ("C", "May Olympic", "2027-05-09", 19, "olympic", 70, 140, 2, 35, 4, 8, 9, 9, 0.85),
-    ("D", "May 70.3", "2027-05-30", 22, "70.3", 340, 520, 3, 80, 8, 8, 7, 6, 0.75),
-    ("E", "June Olympic", "2027-06-06", 23, "olympic", 60, 0, 0, 35, 5, 6, 6, 7, 0.90),
-    ("F", "Sept Champs", "2027-09-12", 37, "olympic", 65, 0, 0, 60, 9, 7, 6, 7, 0.85),
-    ("G", "Sept 70.3", "2027-09-26", 39, "70.3", 330, 250, 2, 85, 9, 9, 10, 10, 0.85),
+    # id, name, date, week, class, fee, travel, days, pts, strat, a_race, org, scenery, swim, bike_gain, run_gain, weather
+    ("A", "Early 70.3", "2027-03-07", 9, "70.3", 350, 700, 3, 85, 7, 0, 9, 6, 8, 300, 50, 0.90),
+    ("B", "Home Sprint", "2027-03-14", 11, "sprint", 45, 0, 0, 20, 3, 0, 6, 5, 6, 100, 30, 0.85),
+    ("C", "May Olympic", "2027-05-09", 19, "olympic", 70, 140, 2, 35, 4, 0, 7, 9, 9, 550, 120, 0.85),
+    ("D", "May 70.3", "2027-05-30", 22, "70.3", 340, 520, 3, 80, 8, 0, 9, 7, 6, 1000, 150, 0.75),
+    ("E", "June Olympic", "2027-06-06", 23, "olympic", 60, 0, 0, 35, 5, 0, 6, 6, 7, 200, 40, 0.90),
+    ("F", "Sept Champs", "2027-09-12", 37, "olympic", 65, 0, 0, 60, 9, 1, 7, 6, 7, 300, 60, 0.85),
+    ("G", "Sept 70.3", "2027-09-26", 39, "70.3", 330, 250, 2, 85, 9, 1, 9, 10, 10, 900, 200, 0.85),
 ], columns=["id", "name", "date", "week", "distance_class",
             "entry_fee_eur", "travel_cost_eur", "vacation_days", "points", "strategic",
-            "course_quality", "scenery", "swim_quality", "weather_prob"])
+            "a_race", "organization", "scenery", "swim_quality",
+            "bike_elev_gain_m", "run_elev_gain_m", "weather_prob"])
 
 
 @pytest.fixture(scope="module")
@@ -92,6 +95,33 @@ def test_tight_days_budget_forces_domestic():
     # the cheap-in-euros/expensive-in-days trade-off must bite:
     # fewer away races than with the default 12-day budget
     assert (chosen["vacation_days"] > 0).sum() <= 1
+
+
+def test_suitability_flat_preference():
+    from src.models.model2_calendar import suitability_score
+    fit = suitability_score(RACES, {"bike": "flat", "run": "flat"})
+    # flat Dubai-like 70.3 (A) must fit better than mountainous 70.3 (D)
+    assert fit[0] > fit[3]
+    # inverting the preference inverts the ordering
+    fit_hilly = suitability_score(RACES, {"bike": "hilly", "run": "hilly"})
+    assert fit_hilly[3] > fit_hilly[0]
+    assert fit.between(0, 10).all()
+
+
+def test_a_race_requirement(solution):
+    sol, _ = solution
+    sel = sol[sol["selected"]]
+    assert (sel["a_race"] == 1).any()
+
+
+def test_a_race_forced_even_when_low_value():
+    # zero out the A-races' points so they are unattractive; constraint must still pick one
+    races = RACES.copy()
+    races.loc[races["a_race"] == 1, ["points", "strategic"]] = 0
+    prob, v = build_model(races, PROFILE)
+    assert solve(prob) == "Optimal"
+    sel = extract_solution(races, v)
+    assert (sel.loc[sel["selected"], "a_race"] == 1).any()
 
 
 def test_weather_risk_lowers_value():
