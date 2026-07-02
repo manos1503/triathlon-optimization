@@ -86,8 +86,10 @@ $\text{CTL}_w, \text{ATL}_w, \text{TSB}_w = \text{CTL}_{w-1} - \text{ATL}_{w-1}$
 | Symbol | Definition |
 |--------|-----------|
 | $R$ | candidate races; race $i$ has week $t_i$, distance class $c_i \in \{\text{sprint}, \text{oly}, 70.3\}$ |
-| $v_i = q_i \left( \alpha\, \text{pts}_i + \beta\, \text{strat}_i + \gamma\, \text{pref}_i \right)$ | risk-adjusted race value; $q_i$ = P(good race-day weather) |
-| $\text{pref}_i$ | composite preference: $0.4\,\text{course}_i + 0.3\,\text{scenery}_i + 0.3\,\text{swim}_i$ (subjective 1–10 scores) |
+| $v_i = q_i \left( \alpha\, \text{pts}_i + \beta\, \text{strat}_i + \gamma\, \text{enj}_i + \phi\, \text{fit}_i \right)$ | risk-adjusted race value; $q_i$ = P(good race-day weather) |
+| $\text{enj}_i$ | enjoyment: $0.3\,\text{org}_i + 0.3\,\text{scenery}_i + 0.4\,\text{swim}_i$ (subjective 1–10 scores) |
+| $\text{fit}_i$ | suitability from objective terrain: flatness score per leg (elevation gain/km, capped at 15 m/km) matched to the athlete's terrain preference, averaged over bike and run |
+| $A \subseteq R$ | championship-quality (A-race) candidates |
 | $\kappa_i$ | total cost (entry fee + travel) |
 | $\delta_i$ | vacation days consumed (home 0, domestic 1–2, Europe 3, transatlantic 5) |
 | $\mathcal{B}$ | season money budget |
@@ -116,6 +118,8 @@ $$\sum_{i : \text{month}(i) = m} x_i \le M \quad \forall m \qquad \text{(monthly
 $$x_i + x_j \le 1 \quad \forall\, i \ne j \text{ with } 0 \le t_j - t_i < \rho_{c_i} \qquad \text{(recovery spacing)}$$
 
 $$x_i + x_j \le 1 \quad \forall (i,j) \in E \qquad \text{(exclusions)}$$
+
+$$\sum_{i \in A} x_i \ge 1 \qquad \text{(at least one A-race — set-covering side constraint)}$$
 
 $$x_i = 0 \quad \text{if } \text{TSB}_{t_i} < \text{TSB}^{\text{req}}_{c_i} \qquad \text{(fitness-readiness link, pre-filter from Model 1)}$$
 
