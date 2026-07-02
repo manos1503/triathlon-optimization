@@ -56,6 +56,23 @@ macrocycle:
     peak:  {weeks: [13, 14]}
     taper: {weeks: [15, 16]}
 
+# Model 2 (race-calendar MIP) parameters
+model2:
+  budget_eur: 2500           # season budget, entries + travel (sensitivity: 1500/2500/4000)
+  max_races_per_month: 2
+  recovery_weeks:            # min weeks after a race of each class before the next race
+    sprint: 1
+    olympic: 2
+    "70.3": 4
+  value_weights:             # v_i = w_pts*points + w_str*strategic + w_pref*preference
+    points: 1.0
+    strategic: 3.0
+    preference: 2.0
+  ctl_required:              # projected CTL needed to be race-ready per class
+    sprint: 60
+    olympic: 75
+    "70.3": 90
+
 # Model 1 (training-load LP) parameters
 model1:
   atl_max: 110               # fatigue ceiling (current ATL ~91; sensitivity: 100/110/125)

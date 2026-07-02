@@ -1,0 +1,17 @@
+id,name,location,date,week,distance_class,entry_fee_eur,travel_cost_eur,points,strategic,preference,notes
+R01,TRIMORE Athens Sprint,Athens GR,2027-03-14,11,sprint,45,0,20,3,6,season opener; home race
+R02,Challenge Heraklion,Crete GR,2027-04-18,16,olympic,110,180,55,6,8,early-season European field
+R03,TRIMORE Syros Olympic,Syros GR,2027-05-09,19,olympic,70,140,35,4,8,island race; favorite course
+R04,Ironman 70.3 Kraichgau,Germany,2027-05-30,22,70.3,340,520,80,8,7,first 70.3 of the season
+R05,Athens Riviera Olympic,Athens GR,2027-06-06,23,olympic,60,0,35,5,7,home race; national ranking
+R06,World Triathlon AG Hamburg,Germany,2027-06-20,25,olympic,150,550,90,9,9,age-group world-series event
+R07,Thessaloniki Sprint,Thessaloniki GR,2027-06-27,26,sprint,40,120,20,3,5,fast field; short travel
+R08,Ironman 70.3 Nice,France,2027-07-11,28,70.3,360,650,85,8,8,prestigious course
+R09,Nafplio Olympic,Nafplio GR,2027-07-18,29,olympic,55,80,30,4,6,hot mid-summer race
+R10,London T100 Age-Group,United Kingdom,2027-08-01,31,olympic,180,600,75,7,7,big-city international race
+R11,Ironman 70.3 Budapest,Hungary,2027-08-22,34,70.3,320,450,80,8,6,flat fast course
+R12,Copenhagen Olympic,Denmark,2027-08-29,35,olympic,140,580,70,7,6,cool-weather racing
+R13,Hellenic Champs Olympic,Athens GR,2027-09-12,37,olympic,65,0,60,9,9,national championship; A-race
+R14,Ironman 70.3 Greece Costa Navarino,Greece,2027-09-26,39,70.3,330,250,85,9,10,home-soil 70.3; A-race candidate
+R15,Chicago Triathlon Olympic,USA,2027-08-29,35,olympic,220,1100,70,6,5,transatlantic; clashes with R12
+R16,Valencia Sprint,Spain,2027-10-10,41,sprint,80,380,25,3,6,end-of-season trip
