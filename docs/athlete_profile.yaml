@@ -64,16 +64,23 @@ model2:
     sprint: 1
     olympic: 2
     "70.3": 4
-  value_weights:             # v_i = weather_prob * (w_pts*points + w_str*strategic + w_pref*preference)
+  value_weights:             # v_i = weather_prob * (w_pts*pts + w_str*strat + w_pref*enjoyment + w_fit*suitability)
     points: 1.0
     strategic: 3.0
     preference: 2.0
-  preference_weights:        # preference = weighted mix of subjective 1-10 scores
-    course_quality: 0.4
-    scenery: 0.3
-    swim_quality: 0.3
+    fit: 2.0
+  preference_weights:        # enjoyment = weighted mix of subjective 1-10 scores
+    organization: 0.3        # event logistics, aid stations, transition setup
+    scenery: 0.3             # views, atmosphere
+    swim_quality: 0.4        # water clarity, temperature, chop
+  # suitability (0-10) is computed from OBJECTIVE course data (elevation gain
+  # per km) matched against the athlete's terrain preference per leg
+  terrain_preference:
+    bike: flat               # flat | hilly | any
+    run: flat
   weather_risk_adjust: true  # multiply race value by P(good conditions)
   vacation_days_budget: 12   # second knapsack dimension: days off work per season
+  require_a_race: true       # at least one championship-quality target per season
   ctl_required:              # projected CTL needed to be race-ready per class
     sprint: 60
     olympic: 75

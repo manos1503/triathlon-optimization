@@ -25,17 +25,43 @@ import pandas as pd
 import pulp
 
 
+# leg distances (km) per class, for elevation-gain normalization
+BIKE_KM = {"sprint": 20.0, "olympic": 40.0, "70.3": 90.0}
+RUN_KM = {"sprint": 5.0, "olympic": 10.0, "70.3": 21.1}
+GPK_CAP = 15.0  # m/km treated as maximally hilly
+
+
 def preference_score(races: pd.DataFrame, pref_weights: dict) -> pd.Series:
-    """Composite personal preference from decomposed subjective scores."""
+    """Composite enjoyment from decomposed subjective scores."""
     return sum(w * races[col] for col, w in pref_weights.items())
+
+
+def _terrain_score(gain_per_km: pd.Series, preference: str) -> pd.Series:
+    flat = 10.0 * (1.0 - gain_per_km.clip(upper=GPK_CAP) / GPK_CAP)
+    if preference == "flat":
+        return flat
+    if preference == "hilly":
+        return 10.0 - flat
+    return pd.Series(7.0, index=gain_per_km.index)  # 'any'
+
+
+def suitability_score(races: pd.DataFrame, terrain_pref: dict) -> pd.Series:
+    """Athlete-course fit (0-10) from OBJECTIVE elevation data per leg."""
+    bike_km = races["distance_class"].map(BIKE_KM)
+    run_km = races["distance_class"].map(RUN_KM)
+    bike = _terrain_score(races["bike_elev_gain_m"] / bike_km, terrain_pref["bike"])
+    run = _terrain_score(races["run_elev_gain_m"] / run_km, terrain_pref["run"])
+    return 0.5 * bike + 0.5 * run
 
 
 def race_value(races: pd.DataFrame, m2: dict) -> pd.Series:
     weights = m2["value_weights"]
-    pref = preference_score(races, m2["preference_weights"])
+    enjoyment = preference_score(races, m2["preference_weights"])
+    fit = suitability_score(races, m2["terrain_preference"])
     raw = (weights["points"] * races["points"]
            + weights["strategic"] * races["strategic"]
-           + weights["preference"] * pref)
+           + weights["preference"] * enjoyment
+           + weights["fit"] * fit)
     if m2.get("weather_risk_adjust", False):
         return races["weather_prob"] * raw   # expected value: a ruined race delivers nothing
     return raw
@@ -106,6 +132,12 @@ def build_model(races: pd.DataFrame, profile: dict,
             need = rec[str(races.loc[earlier, "distance_class"])]
             if gap < need + 1:
                 prob += x[i] + x[j] <= 1, f"recovery_{races.loc[i,'id']}_{races.loc[j,'id']}"
+
+    # at least one championship-quality target (set-covering side constraint)
+    if m2.get("require_a_race", False) and "a_race" in races.columns:
+        a_idx = races.index[races["a_race"] == 1]
+        if len(a_idx):
+            prob += pulp.lpSum(x[i] for i in a_idx) >= 1, "a_race_requirement"
 
     # fitness-readiness pre-filter (Model 1 link)
     for i in races.index:

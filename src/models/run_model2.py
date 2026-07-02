@@ -60,6 +60,17 @@ def run(races_path: str, profile_path: str, outdir: str) -> dict:
     }])
     summary.to_csv(out / "model2_summary.csv", index=False)
 
+    # LP-relaxation duals of the two knapsack constraints: marginal season
+    # value of one more euro vs. one more vacation day
+    duals = {name: c.pi for name, c in prob_lp.constraints.items()
+             if name in ("budget", "vacation_days") and c.pi is not None}
+    pd.DataFrame([
+        {"constraint": k, "shadow_price": round(p, 4),
+         "meaning": {"budget": "season value per extra EUR",
+                     "vacation_days": "season value per extra day off"}[k]}
+        for k, p in duals.items()
+    ]).to_csv(out / "model2_lp_duals.csv", index=False)
+
     frac = lp[(lp["x"] > 0.01) & (lp["x"] < 0.99)]
     print(f"[model2] MIP z={z_mip:.1f}  LP relaxation z={z_lp:.1f}  "
           f"gap {100*(z_lp-z_mip)/z_mip:.2f}%")
@@ -71,6 +82,10 @@ def run(races_path: str, profile_path: str, outdir: str) -> dict:
     if not frac.empty:
         print("\nfractional in LP relaxation (rounded off by B&B):")
         print(frac[["id", "name", "x"]].to_string(index=False))
+    if duals:
+        print("\nLP-relaxation shadow prices:")
+        for k, p in duals.items():
+            print(f"  {k}: {p:.4f}")
     return {"mip": mip, "summary": summary}
 
 
