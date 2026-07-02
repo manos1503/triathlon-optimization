@@ -9,6 +9,10 @@ thresholds:
   run_threshold_pace: "3:53" # min/km at threshold
   bike_ftp_watts: 260        # functional threshold power
 
+heart_rate:
+  hr_max_bpm: 195            # maximum heart rate (adjust to measured value)
+  hr_rest_bpm: 50            # resting heart rate (adjust to measured value)
+
 constraints:
   weekly_hours_max: 12.0     # baseline ceiling; sensitivity: 10 / 12 / 14
   weekly_hours_min_per_discipline:
