@@ -1,0 +1,41 @@
+# Athlete-specific parameters — single source of truth for all models.
+# Values estimated from the 15-month Strava export (Mar 2025 onward).
+
+athlete:
+  name: "Emmanouil Vichos"
+
+thresholds:
+  lthr_bpm: 173              # lactate threshold heart rate
+  run_threshold_pace: "3:53" # min/km at threshold
+  bike_ftp_watts: 260        # functional threshold power
+
+constraints:
+  weekly_hours_max: 12.0     # baseline ceiling; sensitivity: 10 / 12 / 14
+  weekly_hours_min_per_discipline:
+    swim: 1.0
+    bike: 2.0
+    run: 1.5
+
+banister:
+  tau_ctl_days: 42           # chronic training load time constant
+  tau_atl_days: 7            # acute training load time constant
+  k1: 1.0                    # fitness weight in performance objective
+  k2: 2.0                    # fatigue weight in performance objective
+
+# Intensity buckets (collapsed from 7 zones for LP tractability):
+# TRIMP-per-hour rates per discipline and bucket, estimated from HR data.
+# easy   = Z1–Z2 (below ~85% LTHR)
+# moderate = Z3 (tempo, 85–95% LTHR)
+# hard   = Z4+ (threshold and above)
+trimp_rates:
+  swim:     {easy: 50, moderate: 75, hard: 100}
+  bike:     {easy: 55, moderate: 85, hard: 115}
+  run:      {easy: 65, moderate: 95, hard: 130}
+
+macrocycle:
+  weeks: 16
+  phases:
+    base:  {weeks: [1, 6]}
+    build: {weeks: [7, 12]}
+    peak:  {weeks: [13, 14]}
+    taper: {weeks: [15, 16]}
