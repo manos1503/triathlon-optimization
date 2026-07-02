@@ -1,0 +1,10 @@
+sport,bucket,trimp_per_hour,n_activities,source
+bike,easy,68.3,100,observed
+bike,moderate,86.9,28,observed
+bike,hard,142.7,2,theoretical
+run,easy,81.6,262,observed
+run,moderate,102.8,54,observed
+run,hard,166.0,4,theoretical
+swim,easy,43.5,123,observed
+swim,moderate,94.1,1,theoretical
+swim,hard,136.6,0,theoretical
