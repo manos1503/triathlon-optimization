@@ -86,9 +86,12 @@ $\text{CTL}_w, \text{ATL}_w, \text{TSB}_w = \text{CTL}_{w-1} - \text{ATL}_{w-1}$
 | Symbol | Definition |
 |--------|-----------|
 | $R$ | candidate races; race $i$ has week $t_i$, distance class $c_i \in \{\text{sprint}, \text{oly}, 70.3\}$ |
-| $v_i = \alpha\, \text{pts}_i + \beta\, \text{strat}_i + \gamma\, \text{pref}_i$ | race value (weighted score) |
+| $v_i = q_i \left( \alpha\, \text{pts}_i + \beta\, \text{strat}_i + \gamma\, \text{pref}_i \right)$ | risk-adjusted race value; $q_i$ = P(good race-day weather) |
+| $\text{pref}_i$ | composite preference: $0.4\,\text{course}_i + 0.3\,\text{scenery}_i + 0.3\,\text{swim}_i$ (subjective 1–10 scores) |
 | $\kappa_i$ | total cost (entry fee + travel) |
-| $\mathcal{B}$ | season budget |
+| $\delta_i$ | vacation days consumed (home 0, domestic 1–2, Europe 3, transatlantic 5) |
+| $\mathcal{B}$ | season money budget |
+| $\mathcal{D}$ | season vacation-days budget |
 | $M$ | max races per month; $\text{month}(i)$ maps race to month |
 | $\rho_c$ | minimum recovery weeks after a race of class $c$ |
 | $E \subseteq R \times R$ | explicit exclusion pairs (geographic/scheduling conflicts) |
@@ -104,7 +107,9 @@ $$\max \sum_{i \in R} v_i\, x_i$$
 
 subject to
 
-$$\sum_{i} \kappa_i\, x_i \le \mathcal{B} \qquad \text{(budget — knapsack core)}$$
+$$\sum_{i} \kappa_i\, x_i \le \mathcal{B}, \qquad \sum_{i} \delta_i\, x_i \le \mathcal{D} \qquad \text{(two-dimensional knapsack core)}$$
+
+A race can be cheap in euros but expensive in days off work (and vice versa), so the two budget constraints bind differently; their LP-relaxation duals give the marginal value of a euro vs. a vacation day.
 
 $$\sum_{i : \text{month}(i) = m} x_i \le M \quad \forall m \qquad \text{(monthly cap)}$$
 

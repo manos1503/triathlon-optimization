@@ -22,10 +22,25 @@ races; 2027 dates are plausible placements based on each event's usual slot.
 `points` (0–100): proxy for ranking value — World-Series AG events 90, 70.3s 80–85,
 national champs 60, local sprints 20–25.
 `strategic` (0–10): qualification/championship relevance.
-`preference` (0–10): athlete's personal interest.
 
-Race value in Model 2: v_i = w_pts·points + w_str·strategic + w_pref·preference
-with weights in `athlete_profile.yaml`.
+Personal preference is decomposed into three subjective 1–10 scores rather than
+one opaque number: `course_quality` (technical interest, road surface, profile),
+`scenery` (views, atmosphere), `swim_quality` (water clarity, temperature, chop).
+preference = 0.4·course + 0.3·scenery + 0.3·swim (weights in profile).
+
+`weather_prob`: probability of good race-day conditions given location and month
+(e.g. Aegean in May 0.85, Copenhagen late August 0.65, Dubai March 0.90).
+Race value is risk-adjusted: a ruined race delivers no value.
+
+    v_i = weather_prob_i · (w_pts·points + w_str·strategic + w_pref·preference)
+
+## Vacation-days budget (second knapsack dimension)
+
+`vacation_days`: days off work each race consumes — Athens 0, domestic 1–2,
+Europe 3, transatlantic 5. Season cap: 12 days (profile). Together with the
+money budget this makes Model 2 a two-dimensional knapsack: a race can be
+cheap in euros but expensive in days (and vice versa), so the two constraints
+bind differently — compare their shadow prices in the LP relaxation.
 
 ## Structural features (intentional)
 
