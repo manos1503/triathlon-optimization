@@ -42,7 +42,7 @@ def run(input_csv: str, profile_path: str, outdir: str) -> dict:
     )
     traj.round(2).to_csv(out / "ctl_atl_daily.csv")
 
-    rates = trimp_rates(activities)
+    rates = trimp_rates(activities, profile)
     rates.round(1).to_csv(out / "trimp_rates.csv", index=False)
 
     state = current_state(traj)

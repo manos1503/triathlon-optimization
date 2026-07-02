@@ -11,7 +11,8 @@ from src.pipeline.load_strava import load_activities
 from src.pipeline.trimp import add_trimp, banister_trimp, bucket_of
 
 PROFILE = {
-    "thresholds": {"lthr_bpm": 173},
+    "thresholds": {"lthr_bpm": 173,
+                   "lthr_by_sport": {"run": 173, "bike": 166, "swim": 164}},
     "heart_rate": {"hr_max_bpm": 195, "hr_rest_bpm": 50},
     "banister": {"tau_ctl_days": 42, "tau_atl_days": 7},
 }
@@ -72,6 +73,19 @@ def test_ctl_atl_recursion():
     assert math.isclose(traj["ctl"].iloc[0], step1, rel_tol=1e-9)
     assert math.isclose(traj["ctl"].iloc[1], lam_c * step1 + (1 - lam_c) * 100, rel_tol=1e-9)
     assert traj["tsb"].iloc[1] == pytest.approx(traj["ctl"].iloc[0] - traj["atl"].iloc[0])
+
+
+def test_trimp_rates_complete_grid(synthetic_csv):
+    from src.pipeline.trimp import trimp_rates
+    activities = add_trimp(load_activities(synthetic_csv), PROFILE)
+    rates = trimp_rates(activities, PROFILE)
+    assert len(rates) == 9                                # full 3x3 grid
+    assert (rates["trimp_per_hour"] > 0).all()
+    assert set(rates["source"]) <= {"observed", "theoretical"}
+    # harder buckets must cost more TRIMP/hour within each sport
+    for sport, grp in rates.groupby("sport"):
+        by = grp.set_index("bucket")["trimp_per_hour"]
+        assert by["easy"] < by["moderate"] < by["hard"]
 
 
 def test_end_to_end(synthetic_csv):
