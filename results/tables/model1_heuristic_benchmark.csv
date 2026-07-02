@@ -1,0 +1,3 @@
+plan,performance_pT,total_hours,atl_ceiling_violations,race_day_ctl,race_day_atl
+LP optimal,-11.44,,0,,
+80/20 heuristic,-69.5,176.4,13,112.1,90.8

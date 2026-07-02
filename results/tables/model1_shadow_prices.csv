@@ -1,0 +1,23 @@
+constraint,type,week,shadow_price,meaning
+min_run_w16,min_run,16,-12.9479,run minimum forced in week 16
+min_bike_w16,min_bike,16,-10.8375,bike minimum forced in week 16
+min_swim_w16,min_swim,16,-6.9023,swim minimum forced in week 16 (negative = costs performance)
+min_run_w15,min_run,15,-3.9068,run minimum forced in week 15
+min_bike_w15,min_bike,15,-3.27,bike minimum forced in week 15
+min_swim_w15,min_swim,15,-2.0826,swim minimum forced in week 15 (negative = costs performance)
+min_run_w14,min_run,14,-0.7122,run minimum forced in week 14
+min_bike_w14,min_bike,14,-0.5961,bike minimum forced in week 14
+min_swim_w14,min_swim,14,-0.3797,swim minimum forced in week 14 (negative = costs performance)
+atl_cap_w12,atl_cap,12,0.0705,+1 TRIMP/day fatigue tolerance in week 12
+atl_cap_w11,atl_cap,11,0.0597,+1 TRIMP/day fatigue tolerance in week 11
+atl_cap_w10,atl_cap,10,0.0505,+1 TRIMP/day fatigue tolerance in week 10
+atl_cap_w13,atl_cap,13,0.0477,+1 TRIMP/day fatigue tolerance in week 13
+atl_cap_w9,atl_cap,9,0.0428,+1 TRIMP/day fatigue tolerance in week 9
+atl_cap_w8,atl_cap,8,0.0362,+1 TRIMP/day fatigue tolerance in week 8
+atl_cap_w7,atl_cap,7,0.0306,+1 TRIMP/day fatigue tolerance in week 7
+atl_cap_w6,atl_cap,6,0.0259,+1 TRIMP/day fatigue tolerance in week 6
+atl_cap_w5,atl_cap,5,0.022,+1 TRIMP/day fatigue tolerance in week 5
+atl_cap_w4,atl_cap,4,0.0186,+1 TRIMP/day fatigue tolerance in week 4
+atl_cap_w3,atl_cap,3,0.0157,+1 TRIMP/day fatigue tolerance in week 3
+atl_cap_w2,atl_cap,2,0.0133,+1 TRIMP/day fatigue tolerance in week 2
+atl_cap_w1,atl_cap,1,0.0113,+1 TRIMP/day fatigue tolerance in week 1
