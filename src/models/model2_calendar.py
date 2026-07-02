@@ -1,9 +1,10 @@
 """Model 2 — Optimal race-calendar selection (0-1 MIP).
 
-Knapsack core (budget) plus temporal constraints:
+Two-dimensional knapsack core (money + vacation days) plus temporal constraints:
 
-    max  sum_i v_i x_i
+    max  sum_i v_i x_i          v_i = weather_prob_i * (weighted score)
     s.t. sum_i cost_i x_i <= budget
+         sum_i days_i x_i <= vacation_days_budget
          races per calendar month <= M
          recovery spacing: x_i + x_j <= 1 for race pairs closer than the
              recovery requirement of the earlier race (same-week pairs
@@ -24,10 +25,20 @@ import pandas as pd
 import pulp
 
 
-def race_value(races: pd.DataFrame, weights: dict) -> pd.Series:
-    return (weights["points"] * races["points"]
-            + weights["strategic"] * races["strategic"]
-            + weights["preference"] * races["preference"])
+def preference_score(races: pd.DataFrame, pref_weights: dict) -> pd.Series:
+    """Composite personal preference from decomposed subjective scores."""
+    return sum(w * races[col] for col, w in pref_weights.items())
+
+
+def race_value(races: pd.DataFrame, m2: dict) -> pd.Series:
+    weights = m2["value_weights"]
+    pref = preference_score(races, m2["preference_weights"])
+    raw = (weights["points"] * races["points"]
+           + weights["strategic"] * races["strategic"]
+           + weights["preference"] * pref)
+    if m2.get("weather_risk_adjust", False):
+        return races["weather_prob"] * raw   # expected value: a ruined race delivers nothing
+    return raw
 
 
 def project_season_ctl(profile: dict, n_weeks: int = 45) -> list[float]:
@@ -60,7 +71,7 @@ def readiness(races: pd.DataFrame, profile: dict) -> pd.Series:
 def build_model(races: pd.DataFrame, profile: dict,
                 relax: bool = False) -> tuple[pulp.LpProblem, dict]:
     m2 = profile["model2"]
-    v = race_value(races, m2["value_weights"])
+    v = race_value(races, m2)
     cost = races["entry_fee_eur"] + races["travel_cost_eur"]
     ready = readiness(races, profile)
     rec = m2["recovery_weeks"]
@@ -72,6 +83,11 @@ def build_model(races: pd.DataFrame, profile: dict,
     prob += pulp.lpSum(v[i] * x[i] for i in races.index), "season_value"
 
     prob += pulp.lpSum(cost[i] * x[i] for i in races.index) <= m2["budget_eur"], "budget"
+
+    # second knapsack dimension: vacation days off work
+    if "vacation_days_budget" in m2:
+        prob += (pulp.lpSum(races.loc[i, "vacation_days"] * x[i] for i in races.index)
+                 <= m2["vacation_days_budget"]), "vacation_days"
 
     months = pd.to_datetime(races["date"]).dt.month
     for mo in sorted(months.unique()):

@@ -54,6 +54,8 @@ def run(races_path: str, profile_path: str, outdir: str) -> dict:
         "n_selected": int(sel.shape[0]),
         "budget_used_eur": int(sel["cost"].sum()),
         "budget_eur": profile["model2"]["budget_eur"],
+        "vacation_days_used": int(sel["vacation_days"].sum()),
+        "vacation_days_budget": profile["model2"].get("vacation_days_budget"),
         "n_not_ready": int((~mip["ready"]).sum()),
     }])
     summary.to_csv(out / "model2_summary.csv", index=False)
@@ -62,6 +64,7 @@ def run(races_path: str, profile_path: str, outdir: str) -> dict:
     print(f"[model2] MIP z={z_mip:.1f}  LP relaxation z={z_lp:.1f}  "
           f"gap {100*(z_lp-z_mip)/z_mip:.2f}%")
     print(f"[model2] budget {int(sel['cost'].sum())}/{profile['model2']['budget_eur']} EUR, "
+          f"vacation days {int(sel['vacation_days'].sum())}/{profile['model2'].get('vacation_days_budget')}, "
           f"{len(sel)} races selected, {int((~mip['ready']).sum())} excluded by readiness")
     print("\nselected calendar:")
     print(sel[["id", "name", "date", "distance_class", "cost", "value"]].to_string(index=False))
