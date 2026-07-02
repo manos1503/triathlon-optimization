@@ -49,3 +49,17 @@ macrocycle:
     build: {weeks: [7, 12]}
     peak:  {weeks: [13, 14]}
     taper: {weeks: [15, 16]}
+
+# Model 1 (training-load LP) parameters
+model1:
+  atl_max: 110               # fatigue ceiling (current ATL ~91; sensitivity: 100/110/125)
+  polarization_max: 0.20     # max fraction of weekly hours at moderate+hard (80/20 rule)
+  ramp_max: 0.10             # max weekly TRIMP load increase (10%)
+  hours_multiplier:          # phase-dependent fraction of weekly_hours_max
+    base: 0.90
+    build: 1.00
+    peak: 1.00
+    taper: 0.65
+  taper_load_fraction:       # taper-week TRIMP cap vs. average build-phase load
+    15: 0.60
+    16: 0.40
