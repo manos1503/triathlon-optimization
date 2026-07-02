@@ -51,6 +51,7 @@ def build_model(profile: dict, state: dict, rates: pd.DataFrame) -> tuple[pulp.L
     lam_c = math.exp(-7.0 / ban["tau_ctl_days"])
     lam_a = math.exp(-7.0 / ban["tau_atl_days"])
     h_min = profile["constraints"]["weekly_hours_min_per_discipline"]
+    h_max_disc = profile["constraints"].get("weekly_hours_max_per_discipline")
     h_ceiling = profile["constraints"]["weekly_hours_max"]
     taper_frac = {int(k): v for k, v in m1["taper_load_fraction"].items()}
 
@@ -78,7 +79,10 @@ def build_model(profile: dict, state: dict, rates: pd.DataFrame) -> tuple[pulp.L
         prob += total <= h_max, f"hours_cap_w{w}"
 
         for d in DISCIPLINES:
-            prob += pulp.lpSum(h[d][b][w] for b in BUCKETS) >= h_min[d], f"min_{d}_w{w}"
+            disc_hours = pulp.lpSum(h[d][b][w] for b in BUCKETS)
+            prob += disc_hours >= h_min[d], f"min_{d}_w{w}"
+            if h_max_disc:
+                prob += disc_hours <= h_max_disc[d], f"max_{d}_w{w}"
 
         prob += (
             pulp.lpSum(h[d][b][w] for d in DISCIPLINES for b in ("moderate", "hard"))

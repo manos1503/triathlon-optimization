@@ -25,6 +25,12 @@ constraints:
     swim: 1.0
     bike: 2.0
     run: 1.5
+  # realistic ceilings (pool availability, injury risk); also bound the
+  # degeneracy of alternative optimal discipline mixes
+  weekly_hours_max_per_discipline:
+    swim: 4.0
+    bike: 6.5
+    run: 5.0
 
 banister:
   tau_ctl_days: 42           # chronic training load time constant
