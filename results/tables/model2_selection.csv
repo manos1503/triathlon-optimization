@@ -1,0 +1,18 @@
+id,name,date,week,distance_class,cost,value,ready,x,selected,x_lp_relaxation
+R00,Ironman 70.3 Dubai,2027-03-07,9,70.3,1050,120.0,False,0.0,False,0.0
+R01,TRIMORE Athens Sprint,2027-03-14,11,sprint,45,41.0,True,1.0,True,1.0
+R02,Challenge Heraklion,2027-04-18,16,olympic,290,89.0,True,1.0,True,1.0
+R03,TRIMORE Syros Olympic,2027-05-09,19,olympic,210,63.0,True,1.0,True,1.0
+R04,Ironman 70.3 Kraichgau,2027-05-30,22,70.3,860,118.0,True,0.0,False,0.3974
+R05,Athens Riviera Olympic,2027-06-06,23,olympic,60,64.0,True,1.0,True,0.6026
+R06,World Triathlon AG Hamburg,2027-06-20,25,olympic,700,135.0,True,0.0,False,0.3974
+R07,Thessaloniki Sprint,2027-06-27,26,sprint,160,39.0,True,1.0,True,0.6026
+R08,Ironman 70.3 Nice,2027-07-11,28,70.3,1010,125.0,True,0.0,False,0.0
+R09,Nafplio Olympic,2027-07-18,29,olympic,135,54.0,True,1.0,True,1.0
+R10,London T100 Age-Group,2027-08-01,31,olympic,780,110.0,True,0.0,False,0.0
+R11,Ironman 70.3 Budapest,2027-08-22,34,70.3,770,116.0,True,1.0,True,0.5
+R12,Copenhagen Olympic,2027-08-29,35,olympic,720,103.0,True,0.0,False,0.5
+R13,Hellenic Champs Olympic,2027-09-12,37,olympic,65,105.0,True,0.0,False,0.5
+R14,Ironman 70.3 Greece Costa Navarino,2027-09-26,39,70.3,580,132.0,True,1.0,True,0.5
+R15,Chicago Triathlon Olympic,2027-08-29,35,olympic,1320,98.0,True,0.0,False,0.0
+R16,Valencia Sprint,2027-10-10,41,sprint,460,46.0,True,0.0,False,0.0
