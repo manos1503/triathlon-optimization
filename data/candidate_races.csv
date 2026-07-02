@@ -1,4 +1,5 @@
 id,name,location,date,week,distance_class,entry_fee_eur,travel_cost_eur,points,strategic,preference,notes
+R00,Ironman 70.3 Dubai,UAE,2027-03-07,9,70.3,350,700,85,7,7,high value but very early season
 R01,TRIMORE Athens Sprint,Athens GR,2027-03-14,11,sprint,45,0,20,3,6,season opener; home race
 R02,Challenge Heraklion,Crete GR,2027-04-18,16,olympic,110,180,55,6,8,early-season European field
 R03,TRIMORE Syros Olympic,Syros GR,2027-05-09,19,olympic,70,140,35,4,8,island race; favorite course

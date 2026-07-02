@@ -72,6 +72,11 @@ model2:
     sprint: 60
     olympic: 75
     "70.3": 90
+  # season CTL projection (Model 1 -> Model 2 link): off-season start,
+  # then load ramps at ramp_max toward Model 1's build-phase average load
+  offseason_ctl: 60
+  offseason_weekly_load: 400
+  sustained_weekly_load: 770  # avg build-phase TRIMP from Model 1 optimal plan
 
 # Model 1 (training-load LP) parameters
 model1:
