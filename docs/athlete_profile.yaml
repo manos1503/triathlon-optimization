@@ -5,9 +5,15 @@ athlete:
   name: "Emmanouil Vichos"
 
 thresholds:
-  lthr_bpm: 173              # lactate threshold heart rate
+  lthr_bpm: 173              # lactate threshold heart rate (running)
   run_threshold_pace: "3:53" # min/km at threshold
   bike_ftp_watts: 260        # functional threshold power
+  # HR reads lower for the same effort in cycling (~5-8 bpm) and swimming
+  # (~8-10 bpm) than running; sport-specific LTHRs for intensity bucketing.
+  lthr_by_sport:
+    run: 173
+    bike: 166
+    swim: 164
 
 heart_rate:
   hr_max_bpm: 195            # maximum heart rate (adjust to measured value)
