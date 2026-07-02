@@ -64,10 +64,16 @@ model2:
     sprint: 1
     olympic: 2
     "70.3": 4
-  value_weights:             # v_i = w_pts*points + w_str*strategic + w_pref*preference
+  value_weights:             # v_i = weather_prob * (w_pts*points + w_str*strategic + w_pref*preference)
     points: 1.0
     strategic: 3.0
     preference: 2.0
+  preference_weights:        # preference = weighted mix of subjective 1-10 scores
+    course_quality: 0.4
+    scenery: 0.3
+    swim_quality: 0.3
+  weather_risk_adjust: true  # multiply race value by P(good conditions)
+  vacation_days_budget: 12   # second knapsack dimension: days off work per season
   ctl_required:              # projected CTL needed to be race-ready per class
     sprint: 60
     olympic: 75
