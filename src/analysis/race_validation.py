@@ -5,7 +5,7 @@ data pipeline, probe different parts of the model:
 
     Spetsathlon 2026 (sprint*)   CTL 59.0  -- speed caps bind, energy slack
     Epidavros 2025 (Olympic)     CTL 55.6  -- energy budget binds
-    Half-Ironman 2025 (70.3)     CTL 71.4  -- infeasible WITHOUT in-race fueling
+    IM 70.3 Costa Navarino 2025  CTL 71.4  -- infeasible WITHOUT in-race fueling
 
 The 70.3 requires the fueling extension: intake at r kJ/min gives net drain
 sum (e - r) t <= E_tot (still an LP). r = 21 kJ/min (~75 g carbs/h, the
@@ -32,7 +32,7 @@ RACES = [
      {"swim": 0.75, "bike": 25.0, "run": 4.75}, 0.0, (13.2, 50.9, 17.7)),
     ("Epidavros 2025 (Olympic)", "2025-09-06", 55.6,
      {"swim": 1.5, "bike": 40.0, "run": 10.0}, 0.0, (25.8, 91.5, 42.0)),
-    ("Half-Ironman 2025 (70.3)", "2025-10-26", 71.4,
+    ("IM 70.3 Costa Navarino 2025", "2025-10-26", 71.4,
      {"swim": 1.9, "bike": 90.0, "run": 21.1}, 21.0, (32.9, 180.3, 115.2)),
 ]
 
