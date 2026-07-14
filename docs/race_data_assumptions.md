@@ -2,9 +2,42 @@
 
 `data/candidate_races.csv` is a constructed dataset with documented assumptions,
 as allowed by the project proposal ("κατασκευασμένα δεδομένα με τεκμηριωμένες
-παραδοχές"). Race names mix real recurring events (Challenge Heraklion,
-Ironman 70.3 Kraichgau/Nice/Budapest, WT Hamburg) with representative domestic
-races; 2027 dates are plausible placements based on each event's usual slot.
+παραδοχές"). It is a *scenario* for the 2027 season, not the official calendar:
+costs, scores and structural conflicts are the modeled quantities; names anchor
+the scenario to reality where possible.
+
+## Verification status (checked July 2026)
+
+**Verified — 2025 and/or 2026 edition confirmed:**
+
+- Ironman 70.3 Kraichgau: 31 May 2026 (annual; matches R04's late-May slot)
+- Ironman 70.3 Nice: 29 Jun 2025 and 28 Jun 2026; hosts the 2026 70.3 World
+  Championship; official bike gain ~1367 m (matches R08's "mountainous" 1300 m)
+- WTCS Hamburg: 11–12 Jul 2026, ~2500 age-group athletes (matches R06's slot)
+- London T100 (age-group Olympic offered): 9–10 Aug 2025; 25–26 Jul 2026 (R10)
+- Chicago Triathlon: 23–24 Aug 2025, Olympic on Sunday (matches R15 exactly)
+- Ironman 70.3 Greece, Costa Navarino: 26 Oct 2025 — the author raced it (R14)
+- Copenhagen: Olympic-distance racing listed for Aug 2026 (R12)
+- Ironman 70.3 Dubai: recurring February race (2025 edition held; 2026
+  unconfirmed at check time) — R00's early-March placement is one week off its
+  usual slot
+- MTRI / Mediterranean Triathlon Valencia: 2025 edition with sprint distance
+  (R16); note the separate 2025 World Triathlon Cup Valencia was cancelled
+
+**Active organizer, edition dates not centrally listed:** TRIMORE Syros,
+TRIMORE Nafplio, TRIMORE Rethymno — all on the organizer's current
+Multisports Tour (trimore.gr), with recent participant reviews on racecheck.com.
+
+**Representative placements (no verified counterpart in that slot):**
+
+- R11 is modeled as a flat, late-August European 70.3 with moderate travel
+  cost. Its namesake (Ironman 70.3 Budapest) is real but races in **April**
+  (20 Apr 2026); the true late-August alternative (Ironman 70.3 Vichy,
+  23 Aug 2026) has a hillier bike (~1030 m). Read R11 as a representative
+  scenario slot, not a specific event.
+- The Athens-area races (R01, R05, R13) and Thessaloniki sprint (R07) are
+  representative of the Greek domestic race scene (the federation calendar
+  publishes year by year) rather than specific editions.
 
 ## Cost assumptions (EUR)
 
