@@ -77,6 +77,25 @@ def test_infeasible_when_energy_too_low():
     assert solve(prob) != "Optimal"
 
 
+def test_fueling_decision_mode():
+    import copy
+    p = copy.deepcopy(PROFILE)
+    p["model3"]["distances_km"] = {"swim": 1.9, "bike": 90.0, "run": 21.1}
+    p["model3"]["energy_budget_kj_per_ctl"] = 142
+    prob, v = build_model(p, ctl_race_day=71.4, fueling_decision=True)
+    assert solve(prob) == "Optimal"
+    sol = extract_solution(prob, v)
+    # no eating while swimming; absorption ceilings respected per leg
+    assert v["F"]["swim"].varValue == pytest.approx(0.0, abs=1e-6)
+    rbar = p["model3"]["fueling_max_kj_per_min"]
+    for leg in LEGS:
+        assert v["F"][leg].varValue <= rbar[leg] * sol["leg_times"][leg] + 1e-4
+    # at 70.3 the gut is a bottleneck: absorption constraints bind on bike & run
+    duals = sol["duals"]
+    assert duals["absorption_bike"] < -1e-6
+    assert duals["absorption_run"] < -1e-6
+
+
 def test_fueling_extension():
     import copy
     p = copy.deepcopy(PROFILE)

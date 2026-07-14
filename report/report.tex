@@ -538,6 +538,20 @@ carbohydrate per hour, \emph{precisely the standard sports-nutrition
 guideline}. With it, the model reproduces the swim within 0.4 min (33.3 vs.\
 32.9) and the bike within \textbf{one minute} (181.1 vs.\ 180.3).
 
+Fueling can further be made a \emph{decision}: per-leg intake $F_\ell \ge 0$
+(kJ) bounded by gut absorption, $F_\ell \le \bar r_\ell \sum_z t_{\ell z}$
+(swim 0, bike 25, run 15 kJ/min), with budget
+$\sum e_{\ell z} t_{\ell z} - \sum_\ell F_\ell \le E^{\text{tot}}$ --- still an
+LP. The optimizer then \emph{reproduces nutrition practice}: nothing in the
+water, maximal intake on the bike ($\approx 90$ g/h), reduced intake on the
+run. The absorption duals price ``gut training'' directly: at 70.3, one extra
+kJ/min of bike absorption capacity is worth $\approx 1.7$ minutes of race time
+--- while at Olympic distance the same relaxation is worth almost nothing (speed
+caps bind, not energy). Electrolyte and hydration intake, though practically
+crucial, are deliberately not modeled: no defensible linear mechanism links
+them to speed, and the data cannot calibrate one --- a scope boundary, not an
+oversight.
+
 The run tells the most instructive story. The model predicts 86.3 min at even
 pacing; the athlete ran 115.2 with a dramatic positive split: km 1--10 at
 $\approx 4{:}53$/km, then ``the wall'' --- km 11--21 at $\approx 5{:}52$/km with

@@ -68,12 +68,22 @@ def zone_parameters(profile: dict, ftp_watts: float | None = None) -> pd.DataFra
 
 def build_model(profile: dict, ctl_race_day: float,
                 ftp_watts: float | None = None,
-                fueling_kj_min: float | None = None) -> tuple[pulp.LpProblem, dict]:
-    """``fueling_kj_min`` (r): in-race carbohydrate intake. Intake at r kJ/min
-    reduces every zone's NET energy drain, keeping the model an LP:
-    sum (e_lz - r) t_lz <= E_tot. Essential for long-course races (a 5-6 h
-    race is not ridden on stored glycogen alone); r ~ 21 kJ/min corresponds
-    to the standard ~75 g carbohydrate/hour guideline."""
+                fueling_kj_min: float | None = None,
+                fueling_decision: bool = False) -> tuple[pulp.LpProblem, dict]:
+    """In-race carbohydrate intake, two modes.
+
+    Fixed rate (``fueling_kj_min`` = r): intake at r kJ/min reduces every
+    zone's NET energy drain, keeping the model an LP:
+    sum (e_lz - r) t_lz <= E_tot. r ~ 21 kJ/min corresponds to the standard
+    ~75 g carbohydrate/hour guideline.
+
+    Decision mode (``fueling_decision=True``): per-leg intake F_l >= 0 (kJ)
+    becomes a variable, bounded by gut absorption per leg,
+    F_l <= rbar_l * (leg time)  --- linear in both F and t. The energy budget
+    becomes  sum e_lz t_lz - sum_l F_l <= E_tot. The duals of the absorption
+    constraints price 'gut training': minutes saved per extra kJ/min the
+    athlete could absorb in that leg. Essential for long-course races
+    (a 5-6 h race is not ridden on stored glycogen alone)."""
     m3 = profile["model3"]
     r = fueling_kj_min if fueling_kj_min is not None else m3.get("in_race_fueling_kj_per_min", 0.0)
     zp = zone_parameters(profile, ftp_watts)
@@ -96,14 +106,23 @@ def build_model(profile: dict, ctl_race_day: float,
     prob += (pulp.lpSum(s["run", z] * t["run"][z] for z in ZONES)
              - phi * hard_bike_energy >= d["run"]), "dist_run"
 
-    prob += (pulp.lpSum((e[l, z] - r) * t[l][z] for l in LEGS for z in ZONES)
-             <= e_tot), "energy_budget"
+    if fueling_decision:
+        rbar = m3["fueling_max_kj_per_min"]
+        F = pulp.LpVariable.dicts("F", LEGS, lowBound=0)   # kJ ingested per leg
+        prob += (pulp.lpSum(e[l, z] * t[l][z] for l in LEGS for z in ZONES)
+                 - pulp.lpSum(F[l] for l in LEGS) <= e_tot), "energy_budget"
+        for l in LEGS:
+            prob += F[l] <= rbar[l] * pulp.lpSum(t[l][z] for z in ZONES), f"absorption_{l}"
+    else:
+        F = None
+        prob += (pulp.lpSum((e[l, z] - r) * t[l][z] for l in LEGS for z in ZONES)
+                 <= e_tot), "energy_budget"
 
     for l in LEGS:
         prob += (pulp.lpSum(t[l][z] for z in HARD)
                  <= m3["max_hard_fraction"][l] * pulp.lpSum(t[l][z] for z in ZONES)), f"hard_cap_{l}"
 
-    return prob, {"t": t, "zp": zp, "e_tot": e_tot}
+    return prob, {"t": t, "F": F, "zp": zp, "e_tot": e_tot}
 
 
 def solve(prob: pulp.LpProblem) -> str:
