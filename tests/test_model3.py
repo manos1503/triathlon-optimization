@@ -75,3 +75,24 @@ def test_higher_ftp_not_slower_below_saturation():
 def test_infeasible_when_energy_too_low():
     prob, _ = build_model(PROFILE, ctl_race_day=30.0)   # tiny energy budget
     assert solve(prob) != "Optimal"
+
+
+def test_fueling_extension():
+    import copy
+    p = copy.deepcopy(PROFILE)
+    p["model3"]["distances_km"] = {"swim": 1.9, "bike": 90.0, "run": 21.1}
+    p["model3"]["energy_budget_kj_per_ctl"] = 142
+    # 70.3 infeasible on stored energy alone, feasible with standard fueling
+    prob0, _ = build_model(p, ctl_race_day=71.4, fueling_kj_min=0.0)
+    assert solve(prob0) != "Optimal"
+    prob21, _ = build_model(p, ctl_race_day=71.4, fueling_kj_min=21.0)
+    assert solve(prob21) == "Optimal"
+    # more fueling can only help
+    prob25, _ = build_model(p, ctl_race_day=71.4, fueling_kj_min=25.0)
+    assert solve(prob25) == "Optimal"
+    assert pulp.value(prob25.objective) <= pulp.value(prob21.objective) + 1e-6
+    # r = 0 (default) reproduces the baseline model exactly
+    prob_a, _ = build_model(PROFILE, ctl_race_day=81.6)
+    prob_b, _ = build_model(PROFILE, ctl_race_day=81.6, fueling_kj_min=0.0)
+    assert solve(prob_a) == solve(prob_b) == "Optimal"
+    assert pulp.value(prob_a.objective) == pytest.approx(pulp.value(prob_b.objective))
