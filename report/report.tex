@@ -445,7 +445,7 @@ race-day CTL --- fitness is the binding resource up to CTL $\approx 85$.}
 \label{fig:m3sweeps}
 \end{figure}
 
-\subsection{Validation against a real race}
+\subsection{Validation against real races}
 
 The author raced the \emph{Epidavros Standard Triathlon} (Olympic distance) on
 6 September 2025, finishing in 2:43:26. The training data pipeline reconstructs
@@ -484,6 +484,40 @@ finished --- and reproducing the actual 163.4 min requires
 $k_E \approx 142$. A single real race thus pins the model's least-measurable
 constant, and all energy-related duals scale by the same factor
 ($\approx 142/115$) under the recalibration.
+
+A second, more recent race probes a different problem size: the
+\emph{Spetsathlon 2026} (25 April 2026; non-standard sprint --- 750\,m swim,
+25\,km hilly bike, 4.75\,km run), finished in 1:24:28 at a reconstructed
+race-day state of $\text{CTL}=59$, $\text{TSB}\approx 0$. Model~3 re-solved on
+this course geometry predicts 79.7 min vs.\ 84.5 actual
+(Table~\ref{tab:race2}).
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{lrrl}
+\toprule
+Leg & Model & Actual (Spetsathlon) & Assessment\\
+\midrule
+Swim & 12.9 min & 13.2 min & within 0.3 min, again\\
+Bike & 44.4 min (33.8 km/h) & 50.9 min (29.5 km/h) & flat-course assumption, again\\
+Run & 18.9 min & 17.7 min & athlete \emph{beat} the model's Z5 speed cap\\
+\bottomrule
+\end{tabular}
+\caption{Model 3 vs.\ the Spetsathlon 2026 sprint (transitions excluded).}
+\label{tab:race2}
+\end{table}
+
+Two findings sharpen the picture. First, the run prediction errs in the
+\emph{opposite} direction from Epidavros: over only 18 minutes the athlete
+sustained $3{:}44$/km, faster than the model's Z5 ceiling of
+$1.05\times$threshold --- the fixed zone grid underestimates the anaerobic
+contribution available in short races. Second, and theoretically most
+interesting, at sprint distance the energy budget is \emph{slack}
+(the solution is identical for $k_E = 115$ and $142$): the binding constraints
+switch from the energy budget (Olympic) to the per-leg speed and intensity caps
+(sprint). The LP's active set changes with the problem's ``size'' exactly as
+duality theory describes --- and it matches physiology, where sprint racing is
+speed-limited and Olympic-distance racing is energy-limited.
 
 \section{Cross-Model Sensitivity Analysis}
 \label{sec:sensitivity}
