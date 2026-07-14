@@ -2,9 +2,25 @@
 
 `data/candidate_races.csv` is a constructed dataset with documented assumptions,
 as allowed by the project proposal ("κατασκευασμένα δεδομένα με τεκμηριωμένες
-παραδοχές"). Race names mix real recurring events (Challenge Heraklion,
-Ironman 70.3 Kraichgau/Nice/Budapest, WT Hamburg) with representative domestic
-races; 2027 dates are plausible placements based on each event's usual slot.
+παραδοχές"). It is a *scenario* for the 2027 season, not the official calendar:
+costs, scores and structural conflicts are the modeled quantities; names anchor
+the scenario to reality where possible.
+
+## Verification status (checked July 2026)
+
+**Verified active events, plausible calendar slots:** TRIMORE Syros Triathlon
+and TRIMORE Nafplio Triathlon (trimore.gr), TRIMORE Rethymno Triathlon,
+Ironman 70.3 Kraichgau / Nice / Costa Navarino, World Triathlon series Hamburg,
+Chicago Triathlon, Copenhagen Olympic-distance racing (August), Valencia
+Triathlon, Ironman 70.3 Dubai.
+
+**Representative placements:** R11 is modeled as a flat, late-August European
+70.3 with moderate travel cost. Its namesake (Ironman 70.3 Budapest) is a real
+event but races in **April**; true late-August alternatives exist with
+different course profiles (e.g. Ironman 70.3 Vichy, 23 Aug 2026, but with a
+1030 m bike). R11 should therefore be read as a representative slot in the
+scenario, not a specific event. Similarly the Athens-area races (R01, R05,
+R13) are representative of the Attica race scene rather than specific editions.
 
 ## Cost assumptions (EUR)
 
