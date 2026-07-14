@@ -117,6 +117,13 @@ model3:
   # 0 for short races (baseline); ~21 (= ~75 g carbs/h, standard guideline)
   # for long-course -- calibrated & validated on the athlete's 70.3 (Oct 2025)
   in_race_fueling_kj_per_min: 0.0
+  # per-leg gut absorption ceilings (kJ/min) when fueling is a DECISION
+  # variable: F_l <= r_max_l * leg_time. Cannot eat while swimming; upright
+  # stable stomach on the bike absorbs most; running jostling limits intake.
+  fueling_max_kj_per_min:
+    swim: 0.0
+    bike: 25.0
+    run: 15.0
 
 # Model 1 (training-load LP) parameters
 model1:
