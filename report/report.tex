@@ -164,6 +164,9 @@ The objective maximizes predicted race-day performance in the Banister sense,
 \[
 \max\; p_T = k_1\,\text{CTL}_T - k_2\,\text{ATL}_T, \qquad (k_1,k_2)=(1,2).
 \]
+Banister units are arbitrary: the \emph{level} of $p_T$ (here negative, since
+$k_2 > k_1$) has no physical meaning --- only differences between plans and the
+marginal values (duals) are interpretable.
 Maximizing TSB alone would be degenerate (the optimum would be to rest);
 the Banister form rewards early CTL accumulation, whose contribution persists,
 while early-week ATL decays away by race day. The constraints, for every week $w$:
@@ -253,6 +256,31 @@ $\text{TSB}=+21$, inside the band $+15\ldots+25$ recommended by coaching practic
 while the LP over-tapers to $+35$ --- see the $k_2$ discussion in
 Section~\ref{sec:sensitivity}.
 
+\subsection{Validation against actual training}
+
+Parameter estimation from history is not validation, so the optimal plan was
+compared against what the athlete \emph{actually did} in the final 16 weeks of
+the export: 6.6\,h/week at a 37\% moderate+hard share, versus the optimum's
+9.0\,h/week at 15\% (Fig.~\ref{fig:actual}). The athlete trains less and
+substantially \emph{harder} than optimal --- the exact anti-polarized pattern the
+endurance literature warns against --- and the model quantifies the cost: the
+actual pattern cannot sustain the CTL trajectory the optimal plan achieves
+within the same fatigue ceiling. This turns the LP from an abstract exercise
+into a personally actionable diagnosis.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=.8\textwidth]{model1_actual_vs_optimal.png}
+\caption{Actual weekly training (grey) vs.\ the optimal plan (blue) over 16
+weeks.}
+\label{fig:actual}
+\end{figure}
+
+Duality theory itself was also verified numerically on the solved models:
+the primal optimum equals the dual objective $\sum_i y_i b_i$ (strong duality)
+and $y_i \cdot \text{slack}_i = 0$ holds for every constraint (complementary
+slackness), on both Model~1 and Model~3, to $10^{-6}$.
+
 \section{Model 2 --- Race-Calendar Selection (0--1 MIP)}
 
 \subsection{Formulation}
@@ -337,6 +365,17 @@ becomes binding and money stops mattering.}
 increases in \emph{steps} (races are indivisible) beneath the concave LP-relaxation
 curve. Above 3000 EUR the value saturates at 592.7 because all 12 vacation days are
 consumed --- the binding constraint switches dimension.
+
+\paragraph{Strengthening the formulation: clique cuts.} The recovery conflicts
+are encoded pairwise ($x_i + x_j \le 1$), which is integer-equivalent but weak
+in relaxation: three mutually conflicting races at $x = \tfrac12$ satisfy all
+pairwise constraints. Enumerating the maximal cliques of the conflict graph
+(Bron--Kerbosch; 17 nodes) yields four valid inequalities
+$\sum_{i \in C} x_i \le 1$ with $|C| \ge 3$ (largest clique: four August--September
+races). Adding them tightens the LP relaxation from 600.5 to 591.0, closing a
+third of the integrality gap ($5.04\% \to 3.38\%$) without touching the integer
+optimum --- a small demonstration of the cutting-planes idea underlying modern
+branch-and-cut solvers.
 
 \subsection{Network-flow extension}
 
@@ -489,6 +528,48 @@ athlete's true bottlenecks: recovery capacity in training, money in race
 selection, and aerobic endurance --- not peak power --- on race day. All code, data
 assumptions and results are reproducible with a single command from the public
 repository.\footnote{\url{https://github.com/manos1503/triathlon-optimization}}
+
+\appendix
+\section{Appendix: the Simplex Method on a Reduced Instance}
+
+CBC solves every LP in this project with the (dual) Simplex algorithm. To make
+the method visible rather than implicit, Model~3 is reduced to two variables:
+the run leg with two zones,
+\[
+\min\; t_3 + t_5
+\quad\text{s.t.}\quad
+0.2317\, t_3 + 0.2704\, t_5 \ge 10 \;\;(\text{distance}), \qquad
+71.3\, t_3 + 95.1\, t_5 \le 3300 \;\;(\text{energy}), \qquad t \ge 0,
+\]
+with speeds (km/min) and energy rates (kJ/min) taken from the athlete's Z3/Z5
+run parameters and a 3300\,kJ energy share for the leg.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=.62\textwidth]{simplex_toy.png}
+\caption{Feasible region and vertices of the reduced pacing LP. The optimum is
+vertex $B$, the intersection of the two constraints.}
+\label{fig:toy}
+\end{figure}
+
+The feasible region (Fig.~\ref{fig:toy}) has vertices $A = (43.16, 0)$
+(all-Z3, time 43.16, energy slack 223\,kJ), $B = (21.30, 18.73)$ (both
+constraints binding, time 40.03) and the infeasible all-Z5 corner
+$C = (0, 34.70)$, which satisfies the energy budget but not the distance. In
+standard form the problem gains a surplus variable $s_1$ (distance), a slack
+$s_2$ (energy) and one artificial variable for Phase~I. Phase~I drives the
+artificial variable out of the basis, landing at vertex $A$ with basis
+$\{t_3, s_2\}$; in Phase~II the reduced cost of $t_5$ is negative
+($t_5$ covers distance more cheaply per minute at the margin when energy is
+slack), so $t_5$ enters, $s_2$ leaves --- the ratio test blocks at the energy
+constraint --- and the basis $\{t_3, t_5\}$ at vertex $B$ is optimal: both
+reduced costs are nonnegative. The path $A \to B$ is exactly one Simplex pivot;
+CBC reports the same optimum, $t = 40.03$ minutes. The duals at $B$ solve
+$m^{\top} y = c$ with $m$ the binding-constraint matrix: distance is priced at
+$8.64$ min/km and energy at $-0.014$ min/kJ. Both are larger in magnitude than
+the full model's run-distance and energy duals ($6.32$ and $-0.0071$), as they
+should be: the toy has no other zones or legs to absorb a perturbation, so each
+marginal km or kJ hits harder.
 
 \begin{thebibliography}{99}\small
 
