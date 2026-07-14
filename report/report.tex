@@ -445,6 +445,46 @@ race-day CTL --- fitness is the binding resource up to CTL $\approx 85$.}
 \label{fig:m3sweeps}
 \end{figure}
 
+\subsection{Validation against a real race}
+
+The author raced the \emph{Epidavros Standard Triathlon} (Olympic distance) on
+6 September 2025, finishing in 2:43:26. The training data pipeline reconstructs
+the fitness state on that day: $\text{CTL}=55.6$, $\text{TSB}=-14$ --- far below
+the model's assumed optimal preparation ($\text{CTL}=81.6$, $\text{TSB}=+35$),
+so the prediction and the result are compared leg by leg rather than in total
+(Table~\ref{tab:race}).
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{lrrl}
+\toprule
+Leg & Model (optimal prep) & Actual (Epidavros) & Assessment\\
+\midrule
+Swim & 26.1 min & 25.8 min & within 0.3 min --- threshold pace validated\\
+Bike & 71.0 min (33.8 km/h) & 91.5 min (26.2 km/h) & flat-course assumption fails on hills\\
+Run & 39.8 min & 42.0 min & within 5\%, despite fatigue deficit\\
+Transitions & 3.5 min & 4.2 min & reasonable\\
+\midrule
+Total & 140.4 min & 163.4 min & \\
+\bottomrule
+\end{tabular}
+\caption{Model 3 prediction vs.\ the author's actual race, 6 Sep 2025.}
+\label{tab:race}
+\end{table}
+
+The comparison separates parameter quality cleanly. Where zone speeds derive
+from \emph{personally measured} thresholds (swim pace, run pace), predictions
+land within minutes. The 20-minute bike gap is a course-model mismatch: the
+$35$ km/h-at-FTP assumption describes a flat time-trial course, while the
+Epidavros bike leg is hilly --- a course-specific speed curve (or the elevation
+data already used in Model~2) would close most of it. The race also
+\emph{calibrates} the energy link: at the actual race-day CTL of 55.6 the a
+priori budget $E = 115 \cdot \text{CTL}$ is infeasible --- yet the athlete
+finished --- and reproducing the actual 163.4 min requires
+$k_E \approx 142$. A single real race thus pins the model's least-measurable
+constant, and all energy-related duals scale by the same factor
+($\approx 142/115$) under the recalibration.
+
 \section{Cross-Model Sensitivity Analysis}
 \label{sec:sensitivity}
 
