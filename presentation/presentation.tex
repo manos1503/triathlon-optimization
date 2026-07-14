@@ -1,0 +1,299 @@
+\documentclass[10pt,aspectratio=169]{beamer}
+
+\usetheme{Madrid}
+\usecolortheme{seahorse}
+\setbeamertemplate{navigation symbols}{}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+
+\graphicspath{{../results/figures/}}
+
+\definecolor{accent}{RGB}{30,60,140}
+\setbeamercolor{frametitle}{fg=white,bg=accent}
+\setbeamercolor{title}{fg=white,bg=accent}
+
+\title[Triathlon Optimization]{Optimal Athletic Programming in Triathlon\\
+       using Linear and Integer Programming}
+\author[E. Vichos]{Emmanouil Vichos (AM 1100830)}
+\institute[UPatras]{Linear and Combinatorial Optimization --- University of Patras\\
+                    Supervisor: Prof.\ S.\ Daskalaki}
+\date{\today}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Three decisions, one athlete}
+A competitive triathlete must decide:
+\begin{enumerate}
+  \item<1-> \textbf{How to train} --- hours per sport per intensity, over 12--20 weeks\\
+        {\small fitness accrues slowly, fatigue quickly $\Rightarrow$ a dynamic trade-off}
+  \item<2-> \textbf{Which races to enter} --- a season calendar under money,
+        time-off and recovery limits
+  \item<3-> \textbf{How to race} --- distribute a finite energy reserve over
+        swim, bike, run
+\end{enumerate}
+\vspace{6pt}
+\onslide<4->{
+\begin{center}
+\begin{tabular}{ccccc}
+\textbf{Model 1 (LP)} & $\rightarrow$ & \textbf{Model 2 (0--1 MIP)} & $\rightarrow$ & \textbf{Model 3 (LP)}\\
+training load & & race calendar & & pacing strategy
+\end{tabular}
+\end{center}
+\emph{Coupled:} Model 1's fitness state gates race readiness and sets the race-day
+energy budget.}
+\end{frame}
+
+\begin{frame}{Real data: 15 months of my own training}
+\begin{columns}
+\column{.55\textwidth}
+\begin{itemize}
+  \item Strava export: \textbf{598 activities}, 574 kept (Oct 2023 -- Jun 2026)
+  \item Per activity: Banister training impulse
+        $\text{TRIMP} = t \cdot \text{HRr} \cdot 0.64\, e^{1.92\,\text{HRr}}$
+  \item Exponential smoothing $\Rightarrow$ fitness CTL ($\tau{=}42$d),
+        fatigue ATL ($\tau{=}7$d)
+  \item Current state: $\text{CTL}=78.1$, $\text{ATL}=91.5$,
+        $\text{TSB}=-13.4$ (fit but fatigued)
+  \item Intensity buckets vs.\ \emph{sport-specific} threshold HR
+        (run 173 / bike 166 / swim 164 bpm)
+\end{itemize}
+\column{.42\textwidth}
+\centering\small
+\begin{tabular}{lrrr}
+\toprule
+$r_{db}$/h & easy & mod & hard\\
+\midrule
+swim & 43.5 & $94.1^\ast$ & $136.6^\ast$\\
+bike & 68.3 & 86.9 & $142.7^\ast$\\
+run  & 81.6 & 102.8 & $166.0^\ast$\\
+\bottomrule
+\end{tabular}
+
+\vspace{4pt}
+{\scriptsize $^\ast$theoretical (sparse data)}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Model 1 --- training-load allocation (LP)}
+\textbf{Variables:} hours $h_{dbw} \ge 0$ per discipline $\times$ bucket $\times$ week
+($3{\times}3{\times}16 = 144$)
+\vspace{4pt}
+
+\textbf{Banister dynamics as linear equalities} (exact --- smoothing is linear in load):
+\[
+L_w = \sum_{d,b} r_{db} h_{dbw}, \qquad
+\text{CTL}_w = \lambda_c \text{CTL}_{w-1} + (1{-}\lambda_c)\tfrac{L_w}{7}, \qquad
+\text{ATL}_w = \lambda_a \text{ATL}_{w-1} + (1{-}\lambda_a)\tfrac{L_w}{7}
+\]
+
+\textbf{Objective:} race-day performance
+$\;\max\, p_T = k_1 \text{CTL}_T - k_2 \text{ATL}_T$
+\hfill {\small (TSB-max alone would be degenerate: optimum = rest!)}
+\vspace{4pt}
+
+\textbf{Constraints:} weekly hour ceilings (phase-dependent) $\cdot$ discipline
+min/max $\cdot$ 80/20 polarization $\cdot$ $\text{ATL} \le 110$ $\cdot$
+ramp $\le +10\%$/week $\cdot$ taper caps
+\end{frame}
+
+\begin{frame}{Model 1 --- the optimizer discovers periodization}
+\centering
+\includegraphics[width=.75\textwidth]{model1_trajectory.png}
+
+\small Rides the fatigue ceiling for 13 weeks (CTL $78 \to 107$), then tapers.
+Only weeks 15--16 are \emph{constrained} to taper --- \textbf{week 14 tapers by choice}.
+Race day: $\text{TSB}=+35$.
+\end{frame}
+
+\begin{frame}{Model 1 --- duality in action}
+\begin{columns}
+\column{.5\textwidth}
+\centering
+\includegraphics[width=\textwidth]{model1_rhs_ranging.png}
+\column{.48\textwidth}
+\textbf{RHS ranging} (hours ceiling 8--16h):
+\begin{itemize}
+  \item value function piecewise-linear, concave; slopes $1.55 \to 0.94 \to 0.12 \to 0$
+  \item saturates at \textbf{10.5 h/week}: the ATL ceiling binds first
+  \item[$\Rightarrow$] \emph{recovery capacity, not free time, limits this athlete}
+\end{itemize}
+\vspace{4pt}
+\textbf{Largest shadow prices:} race-week minimums
+($-12.9$/forced run hour in week 16) --- the model wants full rest
+\end{columns}
+\end{frame}
+
+\begin{frame}{Model 1 --- alternative optima \& heuristic benchmark}
+\textbf{Alternative optima} (degeneracy made visible):
+fix $p_T = p^\ast$, re-solve min/max total hours
+\begin{center}
+same performance with \textbf{124.2h} or \textbf{162.3h} of season training
+--- a 38h efficiency gap
+\end{center}
+\vspace{4pt}
+\textbf{vs.\ standard coaching heuristic} (fill available hours, 20/45/35 split, 80/15/5 intensity):
+\begin{itemize}
+  \item violates the fatigue ceiling in \textbf{13 of 16 weeks} (chronic overtraining)
+  \item $p_T = -69.5$ vs.\ optimal $-11.4$
+  \item but: heuristic race-day TSB $+21$ is inside the coaching band $+15..25$;
+        the LP's $+35$ is not $\to$ see $k_2$ sensitivity
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Model 2 --- race-calendar selection (0--1 MIP)}
+\textbf{17 candidate races} (Greek / European / long-haul), binary $x_i$
+\[
+\max \sum_i \underbrace{q_i(\alpha\,\text{pts}_i + \beta\,\text{strat}_i
++ \gamma\,\text{enj}_i + \varphi\,\text{fit}_i)}_{\text{weather-risk-adjusted value}} x_i
+\]
+\begin{itemize}
+  \item \textbf{Two-dimensional knapsack:} $\sum \kappa_i x_i \le 2500$ EUR
+        \;and\; $\sum \delta_i x_i \le 12$ vacation days
+  \item recovery spacing $x_i + x_j \le 1$ (1/2/4 weeks by distance class);
+        $\le 2$ races/month; $\ge 1$ A-race
+  \item \textbf{readiness gate from Model 1:} projected CTL must reach the class
+        requirement --- excludes a high-value early-season 70.3
+  \item suitability $\text{fit}_i$ from \emph{objective} course data:
+        elevation gain/km vs.\ athlete's flat-course preference
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Model 2 --- optimal season}
+\centering
+\includegraphics[width=.8\textwidth]{model2_calendar.png}
+
+\small 8 of 17 races, value 571.7, \textbf{2250/2500 EUR and 11/12 days used}.
+Recovery forces National Champs vs.\ home 70.3 --- optimizer picks the 70.3.
+\end{frame}
+
+\begin{frame}{Model 2 --- why Branch \& Bound is needed}
+\begin{columns}
+\column{.52\textwidth}
+\centering
+\includegraphics[width=\textwidth]{model2_budget_sweep.png}
+\column{.46\textwidth}
+\begin{itemize}
+  \item LP relaxation: $z = 600.5$ vs.\ MIP $571.7$ ---
+        \textbf{integrality gap 5.0\%}
+  \item 8 fractional variables; the champs/70.3 conflict splits
+        exactly \textbf{0.5/0.5}
+  \item MIP value-of-budget is a \textbf{step function} under the concave LP curve
+  \item above 3000 EUR the \emph{vacation-days} budget binds instead ---
+        the scarce resource switches
+  \item LP duals: 0.094 value/EUR, $\approx$0 per day off
+\end{itemize}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Model 2 --- network-flow extension}
+Drop the knapsacks and monthly cap $\Rightarrow$ only recovery spacing remains:
+\begin{center}
+\textbf{feasible calendars = paths in a DAG} \quad
+(nodes: races in week order; arc $i \to j$ iff gap $\ge$ recovery$(i)$)
+\end{center}
+\vspace{4pt}
+Three methods, identical result ($z = 639.4$):
+\begin{enumerate}
+  \item dynamic programming (longest path, topological order)
+  \item \textbf{flow LP with continuous variables} --- solution integral anyway:
+        network matrix $\Rightarrow$ \emph{totally unimodular}
+  \item restricted 0--1 MIP
+\end{enumerate}
+\vspace{4pt}
+$\Rightarrow$ the knapsack constraints are precisely what \emph{breaks} the network
+structure and forces Branch \& Bound in the full model.
+\end{frame}
+
+\begin{frame}{Model 3 --- race pacing (LP with linearization)}
+\textbf{Variables:} minutes $t_{\ell z}$ per leg $\times$ intensity zone (Z1--Z5);
+15 variables
+\vspace{4pt}
+
+\textbf{Linearization:} within a zone, speed and energy rate are constants ---
+bike speed $\propto$ (power)$^{1/3}$ (aero drag), economy degrades with intensity
+\vspace{4pt}
+\[
+\min \sum_{\ell,z} t_{\ell z} + T_1 + T_2
+\quad \text{s.t.} \quad
+\underbrace{\textstyle\sum_z s_{\ell z} t_{\ell z} \ge d_\ell}_{\text{distances}},\;
+\underbrace{\textstyle\sum e_{\ell z} t_{\ell z} \le k_E \cdot \text{CTL}_T}_{\text{energy budget (Model 1)}},\;
+\underbrace{\text{Z4+ time caps}}_{\text{per leg}},\;
+\underbrace{\varphi \cdot G}_{\text{bike} \to \text{run}}
+\]
+The coupling: each kJ of hard bike work reduces effective run coverage.
+\end{frame}
+
+\begin{frame}{Model 3 --- ``steady bike, hard run,'' derived}
+\centering
+\includegraphics[width=.72\textwidth]{model3_pacing.png}
+
+\small Olympic distance in 140.4 min; 9389 kJ budget \textbf{exactly} exhausted.
+Bike entirely at Z3: hard biking buys little speed (cube root) and drains the run.
+\end{frame}
+
+\begin{frame}{Model 3 --- what is a watt worth?}
+\centering
+\includegraphics[width=.88\textwidth]{model3_sweeps.png}
+
+\small Energy dual: 1 kJ $=$ 0.43 s. Below 260 W each watt $\approx$ 6 s;
+\textbf{at the current FTP the value collapses} --- with a fixed energy budget,
+more power cannot be fueled. One CTL point $=$ 69--84 s up to CTL $\approx 85$.
+$\Rightarrow$ \emph{build endurance, not peak power.}
+\end{frame}
+
+\begin{frame}{Sensitivity across problem sizes and parameters}
+\begin{columns}
+\column{.52\textwidth}
+\centering
+\includegraphics[width=\textwidth]{model1_distance_scenarios.png}
+\column{.46\textwidth}
+\textbf{Distance scenarios} (12/16/20 weeks, 144--240 vars):
+longer horizons help ($p_T$: $-13.5 \to -10.4$); build--taper structure invariant
+\vspace{6pt}
+
+\textbf{$k_2$ fatigue weight $\in [1,3]$:} race-day TSB stays $35 \pm 2$ ---
+taper depth is \emph{constraint}-determined (race-week minimums), robust to the
+objective's calibration
+\vspace{6pt}
+
+\textbf{Sizes/times:} LP 192 vars / MIP 17 bins / LP 15 vars; all $<$10 ms (CBC/Simplex)
+\end{columns}
+\end{frame}
+
+\begin{frame}{Limitations --- stated honestly}
+\begin{itemize}
+  \item \textbf{Weekly time step} for Banister dynamics (daily would shift constants,
+        not structure)
+  \item \textbf{Sequential pipeline}, not joint optimization --- co-optimizing
+        training + calendar is a natural (larger) MIP extension
+  \item \textbf{Constructed parameters} in Models 2--3 (race values, zone speeds,
+        $k_E$) --- documented assumptions; sensitivity analysis shows which
+        conclusions survive perturbation
+  \item LP's $+35$ TSB over-taper traced to race-week minimum constraints,
+        not to the model concept
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Conclusions}
+\begin{itemize}
+  \item Three coupled models on \textbf{real personal data}, spanning the syllabus:
+        LP + Simplex, duality \& sensitivity, IP + Branch \& Bound,
+        network flows + total unimodularity
+  \item The optimizer \textbf{re-derives coaching wisdom}: periodization,
+        polarized intensity, ``steady bike, hard run''
+  \item Duals price the athlete's true bottlenecks:
+        \emph{recovery capacity} (training), \emph{money} (calendar),
+        \emph{endurance --- not watts} (race day)
+  \item Fully reproducible: \texttt{python -m src.run\_all}, 36 tests\\
+        \footnotesize\url{https://github.com/manos1503/triathlon-optimization}
+\end{itemize}
+\vspace{8pt}
+\centering \Large Thank you! Questions?
+\end{frame}
+
+\end{document}
