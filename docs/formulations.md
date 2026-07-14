@@ -173,6 +173,16 @@ carbs/hour for long-course, $r = 0$ for short races):
 
 $$\sum_{\ell, z} (e_{\ell z} - r)\, t_{\ell z} \le E^{\text{tot}}$$
 
+Alternatively, fueling can be a **decision variable**: $F_\ell \ge 0$ (kJ
+ingested during leg $\ell$), bounded by gut absorption
+$F_\ell \le \bar{r}_\ell \sum_z t_{\ell z}$ (swim 0, bike 25, run 15 kJ/min —
+linear in both $F$ and $t$), with the budget
+$\sum_{\ell,z} e_{\ell z} t_{\ell z} - \sum_\ell F_\ell \le E^{\text{tot}}$.
+The absorption duals price "gut training": minutes saved per extra kJ/min the
+athlete could absorb in each leg. Electrolyte/hydration intake is deliberately
+NOT modeled: no defensible linear mechanism links it to speed, and the training
+data cannot calibrate one.
+
 Per-leg intensity caps:
 
 $$\sum_{z \ge 4} t_{\ell z} \le \rho_\ell \sum_{z} t_{\ell z} \quad \forall \ell$$
