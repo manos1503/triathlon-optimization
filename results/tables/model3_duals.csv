@@ -1,0 +1,7 @@
+constraint,shadow_price,meaning
+dist_swim,26.4183,marginal min per extra swim km
+dist_bike,2.5085,marginal min per extra bike km
+dist_run,6.3207,marginal min per extra run km
+energy_budget,-0.0071,min saved per extra kJ of energy (fitness value)
+hard_cap_swim,-0.0505,min saved per unit relaxed swim intensity cap
+hard_cap_run,-0.0764,min saved per unit relaxed run intensity cap
