@@ -101,6 +101,16 @@ pip install -r requirements.txt
 
 Python ≥3.10. Optimization via PuLP/CBC; data handling via pandas; plots via matplotlib.
 
+## Reproduce everything
+
+```bash
+python -m src.run_all    # pipeline -> Models 1-3 -> all analyses and figures
+python -m pytest tests/  # 33 tests
+```
+
+Without the personal Strava export (`data/raw/activities.csv`, not committed),
+the pipeline step is skipped and the committed processed data is used.
+
 ## Documentation
 
 - [`docs/formulations.md`](docs/formulations.md) — complete mathematical formulation of all three models

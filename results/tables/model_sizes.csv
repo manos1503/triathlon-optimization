@@ -1,0 +1,4 @@
+model,type,variables,constraints,solve_seconds,status,objective
+Model 1 (training LP),LP,192,209,0.005,Optimal,-11.44
+Model 2 (calendar MIP),0-1 MIP,17,27,0.005,Optimal,571.67
+Model 3 (pacing LP),LP,15,7,0.001,Optimal,140.46
