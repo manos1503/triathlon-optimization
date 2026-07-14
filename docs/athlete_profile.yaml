@@ -91,6 +91,29 @@ model2:
   offseason_weekly_load: 400
   sustained_weekly_load: 770  # avg build-phase TRIMP from Model 1 optimal plan
 
+# Model 3 (race-pacing LP) parameters
+model3:
+  distances_km: {swim: 1.5, bike: 40.0, run: 10.0}   # Olympic distance
+  transitions_min: {t1: 2.0, t2: 1.5}
+  swim_threshold_pace_per_100m: "1:40"               # threshold swim speed
+  bike_speed_at_ftp_kmh: 35.0                        # solo non-draft speed at FTP
+  bike_metabolic_efficiency: 0.24                    # mechanical/metabolic ratio
+  run_energy_cost_kj_per_km: 293                     # ~1 kcal/kg/km at 70 kg
+  swim_energy_cost_kj_per_km: 1170                   # ~4x running cost per km
+  # zone intensity as fraction of threshold (power for bike, speed for swim/run);
+  # bike speed scales with cube root of power
+  power_fraction:      {Z1: 0.55, Z2: 0.75, Z3: 0.90, Z4: 1.00, Z5: 1.06}
+  swim_speed_fraction: {Z1: 0.75, Z2: 0.85, Z3: 0.92, Z4: 1.00, Z5: 1.04}
+  run_speed_fraction:  {Z1: 0.72, Z2: 0.82, Z3: 0.90, Z4: 1.00, Z5: 1.05}
+  # economy degrades with intensity (anaerobic contribution): cost/km multiplier
+  intensity_cost_factor: {Z1: 0.95, Z2: 1.00, Z3: 1.05, Z4: 1.12, Z5: 1.20}
+  # E_tot = k_E * CTL(race day); calibrated so an all-threshold race is
+  # just out of reach, forcing genuine pacing decisions
+  energy_budget_kj_per_ctl: 115
+  max_hard_fraction: {swim: 0.40, bike: 0.50, run: 0.50}  # Z4+Z5 share of leg time
+  # bike->run fatigue coupling: km of run coverage lost per kJ of Z4+ bike work
+  bike_run_coupling_km_per_kj: 0.0005
+
 # Model 1 (training-load LP) parameters
 model1:
   atl_max: 110               # fatigue ceiling (current ATL ~91; sensitivity: 100/110/125)
