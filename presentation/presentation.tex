@@ -246,28 +246,34 @@ more power cannot be fueled. One CTL point $=$ 69--84 s up to CTL $\approx 85$.
 $\Rightarrow$ \emph{build endurance, not peak power.}
 \end{frame}
 
-\begin{frame}{Model 3 --- validated against a real race}
-\textbf{Epidavros Standard Triathlon, 6 Sep 2025} --- finish 2:43:26,
-race-day state from the pipeline: $\text{CTL}=55.6$, $\text{TSB}=-14$
-(vs.\ the model's optimal prep: 81.6, $+35$)
-\vspace{4pt}
+\begin{frame}{Model 3 --- validated against two real races}
 \begin{center}\small
-\begin{tabular}{lrrl}
+\begin{tabular}{lrr|rr}
 \toprule
-Leg & Model & Actual & \\
+& \multicolumn{2}{c|}{\textbf{Epidavros 2025} (Olympic)} &
+  \multicolumn{2}{c}{\textbf{Spetsathlon 2026} (sprint$^\ast$)}\\
+Leg & Model & Actual & Model & Actual\\
 \midrule
-Swim & 26.1 & 25.8 & \textbf{within 0.3 min} --- measured threshold\\
-Bike & 71.0 (33.8 km/h) & 91.5 (26.2 km/h) & flat-course assumption vs.\ hilly Epidavros\\
-Run & 39.8 & 42.0 & within 5\%\\
+Swim & 26.1 & 25.8 & 12.9 & 13.2\\
+Bike & 71.0 & 91.5 \emph{(hilly)} & 44.4 & 50.9 \emph{(hilly)}\\
+Run & 39.8 & 42.0 & 18.9 & \textbf{17.7}\\
 \bottomrule
 \end{tabular}
+
+{\scriptsize $^\ast$non-standard: 750 m / 25 km / 4.75 km.
+Race-day fitness reconstructed from the pipeline: CTL 55.6 / 59.0.}
 \end{center}
 \vspace{4pt}
 \begin{itemize}
-  \item personally measured parameters $\Rightarrow$ accurate legs;
-        the one generic assumption (bike speed curve) $\Rightarrow$ the one big miss
-  \item the race \textbf{calibrates} the energy link: a priori $k_E{=}115$ is
-        infeasible at CTL 55.6; the actual finish implies $k_E \approx 142$
+  \item \textbf{swim within 0.3 min both times}; run within 5--7\% ---
+        personally measured thresholds work
+  \item bike misses both times, same direction: the flat-course speed curve
+        is the one generic assumption
+  \item Epidavros \textbf{calibrates} $k_E$ ($115 \to \approx 142$);
+        at sprint distance energy is \emph{slack} --- the \textbf{binding
+        constraints switch} (energy $\to$ speed caps), matching physiology
+  \item Spetsathlon run \emph{beat} the Z5 cap: fixed zones underestimate
+        short-race anaerobic speed
 \end{itemize}
 \end{frame}
 
