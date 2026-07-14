@@ -23,6 +23,11 @@ the scenario to reality where possible.
   usual slot
 - MTRI / Mediterranean Triathlon Valencia: 2025 edition with sprint distance
   (R16); note the separate 2025 World Triathlon Cup Valencia was cancelled
+- Epidavros Legacy (Whynot events, running since 2014): 2026 edition held in
+  early June with Sprint/Standard/Half distances — matches R05's June slot;
+  the athlete raced the 2025 Standard edition (the Model 3 validation race)
+- Hellenic Championship, Olympic distance: on the federation's published 2026
+  calendar (hellastriathlon.gr), Attica, venue pending — matches R13
 
 **Active organizer, edition dates not centrally listed:** TRIMORE Syros,
 TRIMORE Nafplio, TRIMORE Rethymno — all on the organizer's current
@@ -35,9 +40,10 @@ Multisports Tour (trimore.gr), with recent participant reviews on racecheck.com.
   (20 Apr 2026); the true late-August alternative (Ironman 70.3 Vichy,
   23 Aug 2026) has a hillier bike (~1030 m). Read R11 as a representative
   scenario slot, not a specific event.
-- The Athens-area races (R01, R05, R13) and Thessaloniki sprint (R07) are
-  representative of the Greek domestic race scene (the federation calendar
-  publishes year by year) rather than specific editions.
+- The Athens season-opener sprint (R01) and Thessaloniki sprint (R07) are
+  representative of the Greek domestic race scene (the federation publishes
+  its calendar year by year; e.g. the real Psathathlon sprint races in
+  Attica each May, and AXD Sprint in Alexandroupoli each September).
 
 ## Cost assumptions (EUR)
 
