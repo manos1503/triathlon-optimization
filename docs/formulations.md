@@ -167,9 +167,11 @@ $$\sum_{z} s_{\text{swim},z}\, t_{\text{swim},z} \ge d_{\text{swim}}, \qquad
 
 $$\sum_{z} s_{\text{run},z}\, t_{\text{run},z} - \varphi \underbrace{\sum_{z \ge 4} e_{\text{bike},z}\, t_{\text{bike},z}}_{\text{high-intensity bike energy } G} \ge d_{\text{run}}$$
 
-Energy budget:
+Energy budget (with optional in-race fueling at $r$ kJ/min, which reduces every
+zone's net drain and keeps the model linear; $r \approx 21$ kJ/min $=$ ~75 g
+carbs/hour for long-course, $r = 0$ for short races):
 
-$$\sum_{\ell, z} e_{\ell z}\, t_{\ell z} \le E^{\text{tot}}$$
+$$\sum_{\ell, z} (e_{\ell z} - r)\, t_{\ell z} \le E^{\text{tot}}$$
 
 Per-leg intensity caps:
 

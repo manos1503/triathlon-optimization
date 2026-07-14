@@ -67,8 +67,15 @@ def zone_parameters(profile: dict, ftp_watts: float | None = None) -> pd.DataFra
 
 
 def build_model(profile: dict, ctl_race_day: float,
-                ftp_watts: float | None = None) -> tuple[pulp.LpProblem, dict]:
+                ftp_watts: float | None = None,
+                fueling_kj_min: float | None = None) -> tuple[pulp.LpProblem, dict]:
+    """``fueling_kj_min`` (r): in-race carbohydrate intake. Intake at r kJ/min
+    reduces every zone's NET energy drain, keeping the model an LP:
+    sum (e_lz - r) t_lz <= E_tot. Essential for long-course races (a 5-6 h
+    race is not ridden on stored glycogen alone); r ~ 21 kJ/min corresponds
+    to the standard ~75 g carbohydrate/hour guideline."""
     m3 = profile["model3"]
+    r = fueling_kj_min if fueling_kj_min is not None else m3.get("in_race_fueling_kj_per_min", 0.0)
     zp = zone_parameters(profile, ftp_watts)
     s = {(r.leg, r.zone): r.speed_km_min for r in zp.itertuples()}
     e = {(r.leg, r.zone): r.energy_kj_min for r in zp.itertuples()}
@@ -89,7 +96,7 @@ def build_model(profile: dict, ctl_race_day: float,
     prob += (pulp.lpSum(s["run", z] * t["run"][z] for z in ZONES)
              - phi * hard_bike_energy >= d["run"]), "dist_run"
 
-    prob += (pulp.lpSum(e[l, z] * t[l][z] for l in LEGS for z in ZONES)
+    prob += (pulp.lpSum((e[l, z] - r) * t[l][z] for l in LEGS for z in ZONES)
              <= e_tot), "energy_budget"
 
     for l in LEGS:
