@@ -519,6 +519,54 @@ switch from the energy budget (Olympic) to the per-leg speed and intensity caps
 duality theory describes --- and it matches physiology, where sprint racing is
 speed-limited and Olympic-distance racing is energy-limited.
 
+\paragraph{The 70.3 and the fueling extension.} The athlete's half-Ironman
+(26 October 2025; 1.9\,km / 90\,km / 21.1\,km, finish 5:39:05, race-day
+$\text{CTL} = 71.4$, $\text{TSB} = +5.6$ after a genuine taper) exposed a
+structural omission: at 70.3 distance the model is \emph{infeasible} even with
+the calibrated $k_E = 142$ --- stored energy alone cannot cover a 5--6 hour
+race, and indeed no athlete attempts one unfed. In-race carbohydrate intake at
+$r$ kJ/min enters the model linearly, as a reduction of every zone's
+\emph{net} drain:
+\[
+\sum_{\ell,z} (e_{\ell z} - r)\, t_{\ell z} \le E^{\text{tot}},
+\]
+so the extension costs nothing in tractability. Calibrating $r$ against the
+actual race gives $r \approx 21$ kJ/min --- which is $\approx 75$\,g of
+carbohydrate per hour, \emph{precisely the standard sports-nutrition
+guideline}. With it, the model reproduces the swim within 0.4 min (33.3 vs.\
+32.9) and the bike within \textbf{one minute} (181.1 vs.\ 180.3).
+
+The run tells the most instructive story. The model predicts 86.3 min at even
+pacing; the athlete ran 115.2 with a dramatic positive split: km 1--10 at
+$\approx 4{:}53$/km, then ``the wall'' --- km 11--21 at $\approx 5{:}52$/km with
+heart rate \emph{falling} from 162 to $\approx 145$\,bpm. Falling HR with
+collapsing pace is the signature of glycogen depletion, i.e.\ of the energy
+constraint the model encodes: the athlete spent the budget faster than the
+optimal (even) schedule and paid mid-race. The model cannot predict the wall's
+\emph{timing} (its zone speeds carry no within-leg fatigue dynamics --- a
+documented limitation), but the mechanism that produced it is exactly the
+binding constraint of the formulation. Table~\ref{tab:threeraces} summarizes
+all three validations at the calibrated $k_E = 142$ and each race's actual
+reconstructed fitness.
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{llrrrrrr}
+\toprule
+& & \multicolumn{2}{c}{Swim} & \multicolumn{2}{c}{Bike} & \multicolumn{2}{c}{Run}\\
+Race & CTL & model & actual & model & actual & model & actual\\
+\midrule
+Spetsathlon 2026 (sprint$^\ast$) & 59.0 & 12.9 & 13.2 & 44.4 & 50.9 & 18.9 & 17.7\\
+Epidavros 2025 (Olympic) & 55.6 & 27.6 & 25.8 & 83.7 & 91.5 & 43.1 & 42.0\\
+Half-Ironman 2025 (70.3, fueled) & 71.4 & 33.3 & 32.9 & 181.1 & 180.3 & 86.3 & 115.2\\
+\bottomrule
+\end{tabular}
+\caption{Model 3 vs.\ three real races (leg times, min) at $k_E = 142$ and
+actual race-day fitness. $^\ast$non-standard course. Consistent misses:
+hilly-course bike speed (sprint, Olympic) and within-leg run fatigue (70.3).}
+\label{tab:threeraces}
+\end{table}
+
 \section{Cross-Model Sensitivity Analysis}
 \label{sec:sensitivity}
 

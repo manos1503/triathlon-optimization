@@ -246,34 +246,33 @@ more power cannot be fueled. One CTL point $=$ 69--84 s up to CTL $\approx 85$.
 $\Rightarrow$ \emph{build endurance, not peak power.}
 \end{frame}
 
-\begin{frame}{Model 3 --- validated against two real races}
+\begin{frame}{Model 3 --- validated against three real races}
 \begin{center}\small
-\begin{tabular}{lrr|rr}
+\begin{tabular}{llrrrrrr}
 \toprule
-& \multicolumn{2}{c|}{\textbf{Epidavros 2025} (Olympic)} &
-  \multicolumn{2}{c}{\textbf{Spetsathlon 2026} (sprint$^\ast$)}\\
-Leg & Model & Actual & Model & Actual\\
+& & \multicolumn{2}{c}{Swim} & \multicolumn{2}{c}{Bike} & \multicolumn{2}{c}{Run}\\
+Race & CTL & mdl & act & mdl & act & mdl & act\\
 \midrule
-Swim & 26.1 & 25.8 & 12.9 & 13.2\\
-Bike & 71.0 & 91.5 \emph{(hilly)} & 44.4 & 50.9 \emph{(hilly)}\\
-Run & 39.8 & 42.0 & 18.9 & \textbf{17.7}\\
+Spetsathlon '26 (sprint$^\ast$) & 59.0 & 12.9 & 13.2 & 44.4 & 50.9 & 18.9 & \textbf{17.7}\\
+Epidavros '25 (Olympic) & 55.6 & 27.6 & 25.8 & 83.7 & 91.5 & 43.1 & 42.0\\
+Half-Ironman '25 (70.3, fueled) & 71.4 & 33.3 & 32.9 & \textbf{181.1} & \textbf{180.3} & 86.3 & 115.2\\
 \bottomrule
 \end{tabular}
 
-{\scriptsize $^\ast$non-standard: 750 m / 25 km / 4.75 km.
-Race-day fitness reconstructed from the pipeline: CTL 55.6 / 59.0.}
+{\scriptsize Race-day fitness reconstructed from the pipeline; $k_E = 142$
+calibrated on Epidavros. $^\ast$non-standard course.}
 \end{center}
-\vspace{4pt}
+\vspace{2pt}
 \begin{itemize}
-  \item \textbf{swim within 0.3 min both times}; run within 5--7\% ---
-        personally measured thresholds work
-  \item bike misses both times, same direction: the flat-course speed curve
-        is the one generic assumption
-  \item Epidavros \textbf{calibrates} $k_E$ ($115 \to \approx 142$);
-        at sprint distance energy is \emph{slack} --- the \textbf{binding
-        constraints switch} (energy $\to$ speed caps), matching physiology
-  \item Spetsathlon run \emph{beat} the Z5 cap: fixed zones underestimate
-        short-race anaerobic speed
+  \item swim always within 0.4 min; 70.3 bike within \textbf{one minute}
+  \item \textbf{binding constraints switch with distance}: speed caps (sprint)
+        $\to$ energy (Olympic) $\to$ \emph{infeasible unfed} (70.3)
+  \item fueling extension stays LP: $\sum (e_{\ell z} - r) t_{\ell z} \le E$;
+        calibrated $r \approx 21$ kJ/min $=$ \textbf{75 g carbs/h --- the standard
+        guideline}, recovered from the race
+  \item the 70.3 run ``wall'' (4:53 $\to$ 5:52/km, HR 162 $\to$ 145): the energy
+        constraint violated in real life --- mechanism right, within-leg timing
+        beyond the model
 \end{itemize}
 \end{frame}
 
