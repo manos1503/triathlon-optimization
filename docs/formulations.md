@@ -150,7 +150,9 @@ Solved by Branch & Bound (CBC). Analysis compares the LP relaxation bound with t
 
 $t_{\ell z} \ge 0$ — time spent in zone $z$ during leg $\ell$.
 
-The nonlinear speed–energy curve is **linearized by discretization**: within each zone, speed and energy rate are constants, so distance and energy are linear in the $t_{\ell z}$. The athlete's continuous pacing choice becomes a mix over zones.
+The nonlinear speed–energy curve is **linearized by discretization**: within each zone, speed and energy rate are constants, so distance and energy are linear in the $t_{\ell z}$. The athlete's continuous pacing choice becomes a mix over zones (a fractional mix of adjacent zones is interpreted as an intermediate average pace).
+
+Zone constants are derived from the athlete's thresholds: bike speed scales with the cube root of power (aerodynamic drag), $v_z = v_{\text{FTP}} (P_z / \text{FTP})^{1/3}$; swim/run speeds are fixed fractions of threshold pace; energy cost per km rises with intensity (economy degradation factors 0.95–1.20); the energy budget is $E^{\text{tot}} = k_E \cdot \text{CTL}_T$ with $k_E$ calibrated so that an all-threshold race is just infeasible.
 
 ### Objective
 
