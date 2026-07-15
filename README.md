@@ -105,7 +105,7 @@ Python ≥3.10. Optimization via PuLP/CBC; data handling via pandas; plots via m
 
 ```bash
 python -m src.run_all    # pipeline -> Models 1-3 -> all analyses and figures
-python -m pytest tests/  # 33 tests
+python -m pytest tests/  # 44 tests
 ```
 
 Without the personal Strava export (`data/raw/activities.csv`, not committed),
