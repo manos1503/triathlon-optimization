@@ -1,6 +1,6 @@
 \documentclass[11pt,a4paper]{article}
 
-\usepackage[margin=2.4cm]{geometry}
+\usepackage[margin=2.1cm]{geometry}
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx}
 \usepackage{booktabs}
@@ -11,7 +11,16 @@
 \usepackage{microtype}
 
 \graphicspath{{../results/figures/}}
-\captionsetup{font=small,labelfont=bf}
+\captionsetup{font=small,labelfont=bf,skip=4pt}
+\setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
+\setlength{\intextsep}{8pt plus 2pt minus 2pt}
+\setlength{\abovecaptionskip}{4pt}
+\setlength{\belowcaptionskip}{2pt}
+\renewcommand{\topfraction}{.9}
+\renewcommand{\bottomfraction}{.8}
+\renewcommand{\textfraction}{.07}
+\renewcommand{\floatpagefraction}{.8}
+\setlength{\parskip}{0pt}
 
 \title{Optimal Athletic Programming in Triathlon\\
        using Linear and Integer Programming}
@@ -208,7 +217,7 @@ LP has 192 variables and 209 constraints.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=.85\textwidth]{model1_trajectory.png}
+\includegraphics[width=.58\textwidth]{model1_trajectory.png}
 \caption{Optimal CTL/ATL/TSB trajectory. The plan rides the fatigue ceiling
 ($\text{ATL}=110$) for 13 weeks, building CTL from 78 to 107, then tapers.}
 \label{fig:m1traj}
@@ -228,7 +237,7 @@ optimal plan.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=.85\textwidth]{model1_weekly_hours.png}
+\includegraphics[width=.58\textwidth]{model1_weekly_hours.png}
 \caption{Optimal weekly training hours by discipline across macrocycle phases.}
 \label{fig:m1hours}
 \end{figure}
@@ -245,7 +254,7 @@ this athlete, recovery capacity --- not free time --- limits performance.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=.7\textwidth]{model1_rhs_ranging.png}
+\includegraphics[width=.52\textwidth]{model1_rhs_ranging.png}
 \caption{Value function of the weekly-hours RHS: piecewise-linear, concave,
 saturating at 10.5\,h/week.}
 \label{fig:m1rhs}
@@ -287,7 +296,7 @@ into a personally actionable diagnosis.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=.8\textwidth]{model1_actual_vs_optimal.png}
+\includegraphics[width=.56\textwidth]{model1_actual_vs_optimal.png}
 \caption{Actual weekly training (grey) vs.\ the optimal plan (blue) over 16
 weeks.}
 \label{fig:actual}
@@ -374,7 +383,7 @@ R14 & Ironman 70.3 Costa Navarino & Sep 26 & 70.3 & 580 & 117.7\\
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=.9\textwidth]{model2_calendar.png}
+\includegraphics[width=.60\textwidth]{model2_calendar.png}
 \caption{Season timeline: selected races (solid), rejected (faded),
 not race-ready ($\times$).}
 \label{fig:m2cal}
@@ -382,7 +391,7 @@ not race-ready ($\times$).}
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=.8\textwidth]{model2_budget_sweep.png}
+\includegraphics[width=.56\textwidth]{model2_budget_sweep.png}
 \caption{Season value vs.\ budget: the MIP optimum is a step function; the LP
 relaxation is a concave upper bound. Beyond 3000 EUR the vacation-days budget
 becomes binding and money stops mattering.}
@@ -512,7 +521,7 @@ hard bike work reduces effective run coverage by $\varphi$ km.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=.8\textwidth]{model3_pacing.png}
+\includegraphics[width=.56\textwidth]{model3_pacing.png}
 \caption{Optimal pacing for the Olympic distance: steady Z3 bike, hard run.
 Total 140.4 min including transitions; energy budget exactly exhausted.}
 \label{fig:m3pacing}
@@ -540,7 +549,7 @@ unambiguous --- build endurance, not peak power.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=.95\textwidth]{model3_sweeps.png}
+\includegraphics[width=.62\textwidth]{model3_sweeps.png}
 \caption{Parametric analysis of Model 3. Left: race time vs.\ FTP --- watts are
 worth $\sim$6 s each below 260 W and almost nothing above. Right: race time vs.\
 race-day CTL --- fitness is the binding resource up to CTL $\approx 85$.}
@@ -697,7 +706,7 @@ taper, TSB $+33\ldots+36$) is invariant (Fig.~\ref{fig:distance}).
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=.8\textwidth]{model1_distance_scenarios.png}
+\includegraphics[width=.56\textwidth]{model1_distance_scenarios.png}
 \caption{Model 1 across race distances: CTL build (solid) and TSB (dashed) for
 12/16/20-week horizons. The build--taper structure is invariant.}
 \label{fig:distance}
@@ -780,7 +789,7 @@ would close that gap (Fig.~\ref{fig:k2}).
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=.65\textwidth]{model1_k2_sensitivity.png}
+\includegraphics[width=.50\textwidth]{model1_k2_sensitivity.png}
 \caption{Race-day TSB vs.\ fatigue weight $k_2$: nearly flat --- taper depth is
 constraint-determined, robust to the objective's calibration.}
 \label{fig:k2}
@@ -846,7 +855,7 @@ decision at all.}
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=.92\textwidth]{coherence.png}
+\includegraphics[width=.62\textwidth]{coherence.png}
 \caption{Model 1's objective against end-to-end predicted race time. Left:
 $\lambda = k_2/k_1$ gives a strictly monotone relationship. Right: the
 fitness-only budget does not.}
@@ -1004,49 +1013,7 @@ selection, and aerobic endurance --- not peak power --- on race day. All code, d
 assumptions and results are reproducible with a single command from the public
 repository.\footnote{\url{https://github.com/manos1503/triathlon-optimization}}
 
-\appendix
-\section{Appendix: the Simplex Method on a Reduced Instance}
-
-CBC solves every LP in this project with the (dual) Simplex algorithm. To make
-the method visible rather than implicit, Model~3 is reduced to two variables:
-the run leg with two zones,
-\[
-\min\; t_3 + t_5
-\quad\text{s.t.}\quad
-0.2317\, t_3 + 0.2704\, t_5 \ge 10 \;\;(\text{distance}), \qquad
-71.3\, t_3 + 95.1\, t_5 \le 3300 \;\;(\text{energy}), \qquad t \ge 0,
-\]
-with speeds (km/min) and energy rates (kJ/min) taken from the athlete's Z3/Z5
-run parameters and a 3300\,kJ energy share for the leg.
-
-\begin{figure}[h]
-\centering
-\includegraphics[width=.62\textwidth]{simplex_toy.png}
-\caption{Feasible region and vertices of the reduced pacing LP. The optimum is
-vertex $B$, the intersection of the two constraints.}
-\label{fig:toy}
-\end{figure}
-
-The feasible region (Fig.~\ref{fig:toy}) has vertices $A = (43.16, 0)$
-(all-Z3, time 43.16, energy slack 223\,kJ), $B = (21.30, 18.73)$ (both
-constraints binding, time 40.03) and the infeasible all-Z5 corner
-$C = (0, 34.70)$, which satisfies the energy budget but not the distance. In
-standard form the problem gains a surplus variable $s_1$ (distance), a slack
-$s_2$ (energy) and one artificial variable for Phase~I. Phase~I drives the
-artificial variable out of the basis, landing at vertex $A$ with basis
-$\{t_3, s_2\}$; in Phase~II the reduced cost of $t_5$ is negative
-($t_5$ covers distance more cheaply per minute at the margin when energy is
-slack), so $t_5$ enters, $s_2$ leaves --- the ratio test blocks at the energy
-constraint --- and the basis $\{t_3, t_5\}$ at vertex $B$ is optimal: both
-reduced costs are nonnegative. The path $A \to B$ is exactly one Simplex pivot;
-CBC reports the same optimum, $t = 40.03$ minutes. The duals at $B$ solve
-$m^{\top} y = c$ with $m$ the binding-constraint matrix: distance is priced at
-$8.64$ min/km and energy at $-0.014$ min/kJ. Both are larger in magnitude than
-the full model's run-distance and energy duals ($6.32$ and $-0.0071$), as they
-should be: the toy has no other zones or legs to absorb a perturbation, so each
-marginal km or kJ hits harder.
-
-\begin{thebibliography}{99}\small
+\begin{thebibliography}{99}\footnotesize\setlength{\itemsep}{1pt}
 
 \bibitem{banister1975} E.\,W. Banister, T.\,W. Calvert, M.\,V. Savage, T. Bach,
 ``A systems model of training for athletic performance,''
@@ -1104,5 +1071,47 @@ Princeton University Press, 1963.
 Operations Research}, 10th ed., McGraw-Hill, 2015.
 
 \end{thebibliography}
+
+\appendix
+\small
+\section{Appendix: the Simplex Method on a Reduced Instance}
+
+CBC solves every LP in this project with the (dual) Simplex algorithm. To make
+the method visible rather than implicit, Model~3 is reduced to two variables:
+the run leg with two zones,
+\[
+\min\; t_3 + t_5
+\quad\text{s.t.}\quad
+0.2317\, t_3 + 0.2704\, t_5 \ge 10 \;\;(\text{distance}), \qquad
+71.3\, t_3 + 95.1\, t_5 \le 3300 \;\;(\text{energy}), \qquad t \ge 0,
+\]
+with speeds (km/min) and energy rates (kJ/min) taken from the athlete's Z3/Z5
+run parameters and a 3300\,kJ energy share for the leg.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=.48\textwidth]{simplex_toy.png}
+\caption{Feasible region and vertices of the reduced pacing LP. The optimum is
+vertex $B$, the intersection of the two constraints.}
+\label{fig:toy}
+\end{figure}
+
+The feasible region (Fig.~\ref{fig:toy}) has vertices $A = (43.16, 0)$
+(all-Z3, time 43.16, energy slack 223\,kJ), $B = (21.30, 18.73)$ (both
+constraints binding, time 40.03) and the infeasible all-Z5 corner
+$C = (0, 34.70)$. In standard form the problem gains a surplus variable $s_1$
+(distance), a slack $s_2$ (energy) and one artificial variable for Phase~I.
+Phase~I drives the artificial variable out, landing at vertex $A$ with basis
+$\{t_3, s_2\}$; in Phase~II the reduced cost of $t_5$ is negative, so $t_5$
+enters and $s_2$ leaves --- the ratio test blocks at the energy constraint ---
+and the basis $\{t_3, t_5\}$ at $B$ is optimal, both reduced costs being
+nonnegative. The path $A \to B$ is exactly one Simplex pivot;
+CBC reports the same optimum, $t = 40.03$ minutes. The duals at $B$ solve
+$m^{\top} y = c$ with $m$ the binding-constraint matrix: distance is priced at
+$8.64$ min/km and energy at $-0.014$ min/kJ. Both are larger in magnitude than
+the full model's run-distance and energy duals ($6.32$ and $-0.0071$), as they
+should be: the toy has no other zones or legs to absorb a perturbation, so each
+marginal km or kJ hits harder.
+
 
 \end{document}
