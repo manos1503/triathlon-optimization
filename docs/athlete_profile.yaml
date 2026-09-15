@@ -113,6 +113,14 @@ model3:
   max_hard_fraction: {swim: 0.40, bike: 0.50, run: 0.50}  # Z4+Z5 share of leg time
   # bike->run fatigue coupling: km of run coverage lost per kJ of Z4+ bike work
   bike_run_coupling_km_per_kj: 0.0005
+  # --- pipeline coherence (see src/analysis/coherence.py) ---
+  # Form-based energy budget: E = energy_base_kj + k_E*(CTL - lambda*ATL).
+  # Coherence with Model 1 requires lambda = k2/k1; positivity requires
+  # lambda < CTL_T/ATL_T ~ 1.75. k2 = 1.5 satisfies both and lies inside the
+  # cost-ranging stability interval [1.29, 2.95], so the optimal plan is
+  # unchanged. Default 0.0 keeps the validated fitness-only budget.
+  fatigue_lambda: 0.0
+  energy_base_kj: 0.0
   # in-race carbohydrate intake (kJ/min), reduces net energy drain per zone.
   # 0 for short races (baseline); ~21 (= ~75 g carbs/h, standard guideline)
   # for long-course -- calibrated & validated on the athlete's 70.3 (Oct 2025)

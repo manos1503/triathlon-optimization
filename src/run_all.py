@@ -86,7 +86,8 @@ def main():
                 "src.analysis.shadow_prices", "src.analysis.alt_optima",
                 "src.analysis.heuristic_benchmark", "src.analysis.ftp_sweep",
                 "src.analysis.distance_scenarios", "src.analysis.budget_sweep",
-                "src.analysis.k2_sensitivity"):
+                "src.analysis.k2_sensitivity",
+                "src.analysis.coherence", "src.analysis.pipeline_loop"):
         timed(mod, lambda m=mod: subprocess.run([sys.executable, "-m", m], check=True))
 
     df = pd.DataFrame(sizes)

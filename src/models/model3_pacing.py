@@ -66,10 +66,33 @@ def zone_parameters(profile: dict, ftp_watts: float | None = None) -> pd.DataFra
     return pd.DataFrame(rows, columns=["leg", "zone", "speed_km_min", "energy_kj_min"])
 
 
+def energy_budget(profile: dict, ctl: float, atl: float = 0.0,
+                  lam: float | None = None) -> float:
+    """Race-day energy budget.
+
+    Fitness-only (default, lam = 0):   E = k_E * CTL
+    Form-based (lam > 0):              E = E_base + k_E * (CTL - lam * ATL)
+
+    The form-based version is what makes the pipeline coherent: it is an
+    increasing affine function of Model 1's objective p_T = k1*CTL - k2*ATL
+    exactly when lam = k2/k1, so maximizing p_T is equivalent to maximizing
+    race-day energy, hence to minimizing finishing time (Model 3's objective
+    is non-increasing in E). See src/analysis/coherence.py.
+    """
+    m3 = profile["model3"]
+    lam = m3.get("fatigue_lambda", 0.0) if lam is None else lam
+    k_e = m3["energy_budget_kj_per_ctl"]
+    if lam == 0.0:
+        return k_e * ctl
+    return m3.get("energy_base_kj", 0.0) + k_e * (ctl - lam * atl)
+
+
 def build_model(profile: dict, ctl_race_day: float,
                 ftp_watts: float | None = None,
                 fueling_kj_min: float | None = None,
-                fueling_decision: bool = False) -> tuple[pulp.LpProblem, dict]:
+                fueling_decision: bool = False,
+                atl_race_day: float = 0.0,
+                fatigue_lambda: float | None = None) -> tuple[pulp.LpProblem, dict]:
     """In-race carbohydrate intake, two modes.
 
     Fixed rate (``fueling_kj_min`` = r): intake at r kJ/min reduces every
@@ -90,7 +113,7 @@ def build_model(profile: dict, ctl_race_day: float,
     s = {(r.leg, r.zone): r.speed_km_min for r in zp.itertuples()}
     e = {(r.leg, r.zone): r.energy_kj_min for r in zp.itertuples()}
     d = m3["distances_km"]
-    e_tot = m3["energy_budget_kj_per_ctl"] * ctl_race_day
+    e_tot = energy_budget(profile, ctl_race_day, atl_race_day, fatigue_lambda)
     phi = m3["bike_run_coupling_km_per_kj"]
 
     prob = pulp.LpProblem("model3_pacing", pulp.LpMinimize)
