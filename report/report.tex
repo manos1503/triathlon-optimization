@@ -121,20 +121,19 @@ RHS variation, integrality gaps, and alternative optima.
 \section{Literature}
 
 The training model rests on the fitness--fatigue framework of Banister et
-al.~\cite{banister1975}, applied to triathletes by Millet et
-al.~\cite{millet2002} and revisited critically by Hellard et
-al.~\cite{hellard2006}; taper practice follows Mujika~\cite{mujika2009}, and a
-recent optimization treatment of tapering appears in Ceddia et
-al.~\cite{ceddia2025}. Race selection is a knapsack-type selection problem in the
-tradition of integer-programming modeling~\cite{nemhauser1988,williams2013}; sports
-scheduling as an IP application area is surveyed by Ribeiro~\cite{ribeiro2012} and
-advocated pedagogically by Trick~\cite{trick2005}. Pacing strategy in endurance
-sport is reviewed by Abbiss and Laursen~\cite{abbiss2008}; the physiological
-asymmetries between cycling and running that motivate our coupling constraint are
-documented by Millet et al.~\cite{millet2009} and factors specific to triathlon
-pacing by Wu et al.~\cite{wu2014}; a numerical-optimization approach to pacing
-appears in Ni et al.~\cite{ni2022}. General LP/OR background follows Dantzig
-\cite{dantzig1963} and Hillier--Lieberman~\cite{hillier2015}.
+al.~\cite{banister1975}, applied to triathletes by Millet et al.~\cite{millet2002}
+and criticised by Hellard et al.~\cite{hellard2006}; taper practice follows
+Mujika~\cite{mujika2009}, with a recent optimization treatment in Ceddia et
+al.~\cite{ceddia2025}. Race selection is a knapsack-type selection problem in
+the integer-programming modelling tradition~\cite{nemhauser1988,williams2013};
+sports scheduling as an IP application area is surveyed by
+Ribeiro~\cite{ribeiro2012} and advocated pedagogically by Trick~\cite{trick2005}.
+Pacing is reviewed by Abbiss and Laursen~\cite{abbiss2008}; the cycling--running
+asymmetries behind our coupling constraint are documented by Millet et
+al.~\cite{millet2009} and triathlon-specific factors by Wu et al.~\cite{wu2014},
+with a numerical-optimization approach in Ni et al.~\cite{ni2022}. General LP/OR
+background follows Dantzig~\cite{dantzig1963} and
+Hillier--Lieberman~\cite{hillier2015}.
 
 \section{Data}
 
@@ -191,6 +190,52 @@ Legacy, the Hellenic Championship on the federation's published calendar);
 slots without a verifiable counterpart are explicitly labeled representative.
 All assumptions and per-race verification statuses are recorded in the
 repository (\texttt{docs/race\_data\_assumptions.md}).
+
+\section{Solution Method}
+\label{sec:solution}
+
+All three models are written in Python with PuLP as the algebraic modelling
+layer and solved with CBC, the toolchain used in the course. Each model is
+built by a \texttt{build\_model} function that returns the
+\texttt{pulp.LpProblem} together with its variable dictionaries; a
+\texttt{solve} wrapper calls \texttt{PULP\_CBC\_CMD} and returns the status
+string, and an \texttt{extract\_solution} function converts the solved problem
+into data frames of the plan, the trajectory and the dual values. Keeping these
+three steps separate is what allows every sensitivity experiment in
+Sections~\ref{sec:m1duality} and~\ref{sec:sensitivity} to rebuild and re-solve
+the same model under perturbed data without duplicating any formulation.
+
+Models~1 and~3 are pure linear programs and CBC solves them with the simplex
+method; Appendix~\ref{sec:simplex} works a two-variable reduction of Model~3 by
+hand, through Phase~I and a single Phase~II pivot, to make the algorithm
+explicit rather than implicit. Model~2 is a 0--1 program and is solved by
+branch and bound on the LP relaxation; the relaxation is also solved on its own
+so that the integrality gap and the fractional variables can be inspected, and
+clique cuts are added separately to show how a tighter formulation closes part
+of that gap. Because every logical condition in Model~2 is expressed through
+standard linear templates rather than big-$M$ terms, the relaxation is tight
+enough that branch and bound terminates immediately at this size.
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{llrrrr}
+\toprule
+Model & Type & Variables & Constraints & Solve time & Objective\\
+\midrule
+Model 1 (training) & LP & 192 & 209 & 5 ms & $-11.44$\\
+Model 2 (calendar) & 0--1 MIP & 17 & 27 & 5 ms & $571.67$\\
+Model 3 (pacing) & LP & 15 & 7 & 1 ms & $140.46$\\
+\bottomrule
+\end{tabular}
+\caption{Problem sizes and CBC solve times for the baseline instances
+(\texttt{results/tables/model\_sizes.csv}).}
+\label{tab:sizes2}
+\end{table}
+
+The solved output of all three models is reproduced verbatim in
+Appendix~\ref{sec:output}, the code that produces it in
+Appendix~\ref{sec:code}, and the complete set of results can be regenerated
+with the single command \texttt{python -m src.run\_all}.
 
 \section{Model 1 --- Optimal Training-Load Allocation (LP)}
 
@@ -733,24 +778,9 @@ taper, TSB $+33\ldots+36$) is invariant (Fig.~\ref{fig:distance}).
 \caption{Model 1 across race distances: CTL build (solid) and TSB (dashed) for
 12/16/20-week horizons. The build--taper structure is invariant.}
 \label{fig:distance}
-\end{figure} All instances solve in under 10\,ms with
-CBC (Table~\ref{tab:sizes}), whose LP engine is the (dual) Simplex algorithm; the
-Simplex method is thus exercised implicitly by every solve in the project.
+\end{figure} All instances solve in under 10\,ms with CBC (Table~\ref{tab:sizes2}).
 
-\begin{table}[h]
-\centering\small
-\begin{tabular}{lcccc}
-\toprule
-Model & Type & Variables & Constraints & Solve time\\
-\midrule
-Model 1 (training) & LP & 192 & 209 & 5 ms\\
-Model 2 (calendar) & 0--1 MIP & 17 & 27 & 5 ms\\
-Model 3 (pacing) & LP & 15 & 7 & 1 ms\\
-\bottomrule
-\end{tabular}
-\caption{Model sizes and CBC solve times (baseline instances).}
-\label{tab:sizes}
-\end{table}
+
 
 \paragraph{Perturbing the cost vector $c$.} Sensitivity analysis of the
 objective coefficients completes the picture begun by the RHS ranging of
@@ -939,73 +969,60 @@ validation elsewhere in this report is unaffected and independently checkable.
 \label{sec:recommendations}
 
 The models were built to be solved, but their purpose is to change decisions.
-This section collects the actionable output, each item traceable to a specific
-result rather than to coaching opinion.
+Each item below is traceable to a specific result rather than to coaching
+opinion.
 
-\paragraph{Train more, and much easier.} The sharpest finding is the gap
-between the optimal plan and what the athlete actually does. Over the last 16
-weeks of the export the realised training was 6.6\,h/week with $37\%$ of time at
-moderate-or-hard intensity; the optimum is 9.0\,h/week with $15\%$. The athlete
-trains \emph{less volume at roughly double the intensity share} --- the classic
-anti-polarised pattern. Both directions matter: the heuristic benchmark shows
-that simply filling the available hours at high intensity violates the fatigue
-ceiling in 13 of 16 weeks, so the recommendation is more easy volume, not more
-training.
+\begin{itemize}\itemsep2pt
+\item \textbf{Train more, and much easier.} Realised training over the last 16
+weeks was 6.6\,h/week with $37\%$ of time at moderate-or-hard intensity; the
+optimum is 9.0\,h/week with $15\%$ --- less volume at double the intensity
+share, the classic anti-polarised pattern. The heuristic benchmark shows the
+opposite error is equally costly: filling the hours at high intensity breaches
+the fatigue ceiling in 13 of 16 weeks. The recommendation is more easy volume,
+not more training.
 
-\paragraph{Recovery capacity, not free time, is the binding resource.} RHS
-ranging on the weekly-hours ceiling shows the objective saturating at
-10.5\,h/week: beyond that, extra available hours have zero shadow price because
-the ATL ceiling binds first (Section~\ref{sec:m1duality}). Buying more training
-time --- the athlete's instinctive lever --- is worthless here. What has positive
-value is anything that raises tolerable fatigue: sleep, nutrition, and load
-management. The ATL-ceiling duals peak in the late build phase, so that is when
-recovery investment pays most.
+\item \textbf{Recovery capacity, not free time, is binding.} RHS ranging shows
+the objective saturating at 10.5\,h/week, beyond which extra hours have zero
+shadow price because the ATL ceiling binds first. Buying training time is
+worthless; raising tolerable fatigue (sleep, nutrition, load management) is not,
+and the ATL duals peak in late build, which is when that investment pays.
 
-\paragraph{Build endurance, not peak power.} The parametric sweeps answer the
-athlete's own question directly. Below the current FTP of 260\,W each watt is
-worth $\approx 6$\,s of Olympic-distance race time, but the marginal value
-collapses to nearly zero at 260--270\,W: with a fixed energy budget, extra power
-cannot be fuelled. One point of CTL, by contrast, is worth 69--84\,s up to
-$\text{CTL} \approx 85$. Time on the FTP test is misallocated effort; time
-building chronic load is not.
+\item \textbf{Build endurance, not peak power.} Below the current 260\,W each
+watt is worth $\approx 6$\,s of Olympic-distance time, but the marginal value
+collapses to nearly zero at 260--270\,W --- with a fixed energy budget, extra
+power cannot be fuelled. One CTL point is worth 69--84\,s up to
+$\text{CTL} \approx 85$.
 
-\paragraph{Race day: ride steady, run hard, and pace the run evenly.} The
-optimal Olympic-distance strategy is the entire bike leg at Z3 and a run split
-between Z3 and the Z5 cap --- hard biking buys little speed on a cube-root curve
-while draining both the shared energy budget and, through the coupling term, the
-run. The 70.3 validation shows the cost of violating this: going out at
-$4{:}53$/km and fading to $5{:}52$/km with heart rate falling from 162 to
-145\,bpm cost roughly 29 minutes against the model's even-paced schedule.
+\item \textbf{Ride steady, run hard, pace the run evenly.} The optimum rides
+the whole bike leg at Z3 and splits the run between Z3 and the Z5 cap. The 70.3
+validation prices the alternative: going out at $4{:}53$/km and fading to
+$5{:}52$/km with heart rate dropping from 162 to 145\,bpm cost roughly 29
+minutes against the even-paced schedule.
 
-\paragraph{Fuel at the guideline rate, and train the gut.} The calibrated
-in-race intake of $\approx 21$\,kJ/min recovers the standard 75\,g of
-carbohydrate per hour. With fuelling as a decision the optimizer takes nothing
-in the water, the maximum on the bike, and less on the run --- and the absorption
-duals price gut training at $\approx 1.7$ minutes per additional kJ/min of bike
-absorption capacity at 70.3 distance, while the same capacity is worth almost
-nothing at Olympic distance. Gut training is a long-course intervention only.
+\item \textbf{Fuel at the guideline rate; train the gut only for long course.}
+The calibrated intake of $\approx 21$\,kJ/min recovers the standard 75\,g
+carbohydrate/hour. Absorption duals price gut training at $\approx 1.7$ min per
+extra kJ/min of bike capacity at 70.3, and at almost nothing at Olympic
+distance.
 
-\paragraph{Race mostly at home, and protect the calendar.} Model 2 selects six
-of eight races domestically: cheap Greek races dominate on value per euro, and
-cost ranging shows several of them stay in the calendar even if their value
-falls to zero. The scarce resource is not money (0.094 per euro) or time off
-($\approx 0$ per day) but \emph{calendar space}: the recovery conflict between
-the Hellenic Championship and the Costa Navarino 70.3 carries a shadow price of
-56.4, the largest in the model. Scheduling decisions deserve more care than
-budget decisions.
+\item \textbf{Protect the calendar, not the budget.} Six of eight selected
+races are domestic, and cost ranging shows several stay in even if their value
+falls to zero. The scarce resource is neither money (0.094 per euro) nor time
+off ($\approx 0$ per day) but calendar space: the Hellenic Championship /
+Costa Navarino recovery conflict prices at 56.4, the largest dual in the model.
 
-\paragraph{Two concrete calendar calls.} The early-season Dubai 70.3, despite
-high value, is correctly excluded --- the projected CTL cannot reach the 70.3
-readiness threshold by early March. And if the season's A-race is the Costa
-Navarino 70.3, the macrocycle should be the 20-week 70.3 build, not the 16-week
-Olympic one; this is precisely the inconsistency the fixed-point iteration of
-Section~\ref{sec:coherence} detected and corrected.
+\item \textbf{Two concrete calendar calls.} The early-season Dubai 70.3 is
+correctly excluded --- projected CTL cannot reach the 70.3 readiness threshold
+by March. And with Costa Navarino as the A-race the macrocycle should be the
+20-week 70.3 build, not the 16-week Olympic one, exactly as the fixed-point
+iteration of Section~\ref{sec:coherence} detected.
+\end{itemize}
 
 \section{Discussion and Limitations}
 
-Three modeling limitations deserve honesty. First, the weekly Banister recursion
-is a coarse time step; daily dynamics would shift constants slightly, though not
-the structure of the optimum. Second, the pipeline is solved by
+Three limitations deserve honesty. First, the weekly Banister recursion is a
+coarse time step; daily dynamics would shift constants, not the structure of the
+optimum. Second, the pipeline is solved by
 decomposition rather than as one joint program: Section~\ref{sec:coherence}
 replaces the fixed solution order with a fixed-point iteration and shows the
 objectives can be made coherent, but a single monolithic model co-optimizing
@@ -1176,6 +1193,7 @@ Simplex example (Fig.~\ref{fig:toy}) & \texttt{src/analysis/simplex\_toy.py} & \
 \end{table}
 
 \section{Appendix: the Simplex Method on a Reduced Instance}
+\label{sec:simplex}
 
 CBC solves every LP in this project with the (dual) Simplex algorithm. To make
 the method visible rather than implicit, Model~3 is reduced to two variables:
