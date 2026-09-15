@@ -293,8 +293,41 @@ taper depth is \emph{constraint}-determined (race-week minimums), robust to the
 objective's calibration
 \vspace{6pt}
 
+\textbf{Cost ranging} ($c$-perturbation): plan invariant for
+$k_1 \in [0.68, 1.56]$, $k_2 \in [1.29, 2.95]$ --- robust to the least
+measurable parameters
+\vspace{6pt}
+
 \textbf{Sizes/times:} LP 192 vars / MIP 17 bins / LP 15 vars; all $<$10 ms (CBC/Simplex)
 \end{columns}
+\end{frame}
+
+\begin{frame}{Model 2 --- the dual problem}
+LP relaxation is already in standard form
+$\max\{c^{T}x \mid Ax \le b,\, x \ge 0\}$, so the dual is
+$\min\{b^{T}y \mid A^{T}y \ge c,\, y \ge 0\}$:
+\[
+\kappa_i y_\mathcal{B} + \delta_i y_\mathcal{D} + y_{\text{month}(i)}
++ \sum_{j} y_{ij} - [i \in A] y_A \;\ge\; v_i
+\]
+\begin{center}\small
+\emph{a race enters only if its value covers the shadow cost of what it consumes}
+\end{center}
+\begin{center}\small
+\begin{tabular}{llr}
+\toprule
+Dual & Meaning & Price\\
+\midrule
+$y_{13,14}$ & Hellenic Champs vs.\ Costa Navarino conflict & \textbf{56.40}\\
+$y_{06,07}$ & Hamburg vs.\ Thessaloniki conflict & 31.67\\
+$y_\mathcal{B}$ & one extra euro & 0.094\\
+$y_\mathcal{D}$ & one extra vacation day & $\approx 0$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\vspace{2pt}
+$\Rightarrow$ the scarce resource is neither money nor days off but
+\textbf{calendar space}: recovery between races.
 \end{frame}
 
 \begin{frame}{Limitations --- stated honestly}

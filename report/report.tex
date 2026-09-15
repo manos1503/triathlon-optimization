@@ -32,7 +32,8 @@ the author's real training data (574 activities from a Strava export). The model
 form a pipeline: the fitness state produced by the training model gates race
 selection and sets the energy budget for pacing. Beyond the base solutions, the
 project exercises the full course syllabus --- Simplex-based LP solving, duality and
-shadow-price interpretation, right-hand-side ranging, Branch \& Bound with LP
+shadow-price interpretation, right-hand-side and objective-coefficient ranging,
+an explicit primal--dual pair, Branch \& Bound with LP
 relaxation gaps, and a network-flow reduction with an empirical total-unimodularity
 demonstration. Several optimal solutions reproduce established coaching wisdom
 (build-then-taper periodization, ``steady bike, hard run'' pacing) without it being
@@ -223,6 +224,7 @@ optimal plan.
 \end{figure}
 
 \subsection{Duality and sensitivity}
+\label{sec:m1duality}
 
 \paragraph{RHS ranging.} Re-solving for hour ceilings $H^{\max}\in[8,16]$ traces
 the LP value function (Fig.~\ref{fig:m1rhs}): empirically piecewise-linear and
@@ -317,6 +319,7 @@ too-early Dubai 70.3.
 
 \subsection{Results}
 
+\label{sec:m2results}
 The optimum selects 8 of 17 races for a value of 571.7
 (Table~\ref{tab:calendar}, Fig.~\ref{fig:m2cal}), spending 2250 of 2500 EUR
 and 11 of 12 vacation days --- both knapsack dimensions are nearly binding. The
@@ -381,6 +384,64 @@ races). Adding them tightens the LP relaxation from 600.5 to 591.0, closing a
 third of the integrality gap ($5.04\% \to 3.38\%$) without touching the integer
 optimum --- a small demonstration of the cutting-planes idea underlying modern
 branch-and-cut solvers.
+
+\subsection{The dual problem and its interpretation}
+
+The LP relaxation of Model~2 is already in the standard primal form
+$\max\{c^{T}x \mid Ax \le b,\; x \ge 0\}$, so its dual follows immediately as
+$\min\{b^{T}y \mid A^{T}y \ge c,\; y \ge 0\}$. Writing it out with one dual
+variable per constraint family --- $y_\mathcal{B}$ (money budget), $y_\mathcal{D}$
+(vacation days), $y_m$ (races in month $m$), $y_{ij}$ (recovery conflict between
+races $i$ and $j$), $y_A$ (A-race requirement) --- gives
+\[
+\min\; \mathcal{B}\,y_\mathcal{B} + \mathcal{D}\,y_\mathcal{D}
+      + \sum_m M\,y_m + \sum_{(i,j)} y_{ij} - y_A
+\]
+subject to, for every candidate race $i$,
+\[
+\underbrace{\kappa_i\, y_\mathcal{B} + \delta_i\, y_\mathcal{D}
+ + y_{\text{month}(i)} + \sum_{j:\,(i,j)\in C} y_{ij}
+ - [\,i \in A\,]\, y_A}_{\text{shadow cost of the resources race } i \text{ consumes}}
+\;\ge\; v_i ,
+\qquad y \ge 0 .
+\]
+The dual constraint is the economic statement of the problem: a race enters the
+optimal calendar only when the value it delivers covers the shadow cost of
+everything it consumes --- euros, days off, its slot in the month, and the
+races it blocks through recovery. By complementary slackness, races selected
+strictly inside the budget satisfy this with equality, while rejected races
+have strict surplus, and that surplus is exactly the amount by which their
+value would have to rise to make them worth entering
+(Section~\ref{sec:sensitivity}).
+
+Solving the relaxation gives 12 nonzero duals out of 27 constraints, and their
+ranking is the project's most counter-intuitive result
+(Table~\ref{tab:m2duals}). The money budget prices at only $0.094$ per euro and
+the vacation-day budget at $\approx 0$, while the \emph{recovery} conflicts
+dominate: the constraint separating the Hellenic Championship from the Costa
+Navarino 70.3 two weeks later carries a shadow price of $56.4$, by far the
+largest in the model. For this athlete the binding resource is neither money
+nor time off work but \emph{calendar space}: the physiological requirement to
+recover between races is what truly constrains the season.
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{llr}
+\toprule
+Dual variable & Meaning & Shadow price\\
+\midrule
+$y_{13,14}$ & Hellenic Champs vs.\ Costa Navarino 70.3 conflict & 56.40\\
+$y_{06,07}$ & Hamburg vs.\ Thessaloniki conflict & 31.67\\
+$y_{11,13}$ & Budapest vs.\ Hellenic Champs conflict & 26.77\\
+$y_{\text{ready},00}$ & fitness-readiness gate on Dubai 70.3 & 25.59\\
+$y_\mathcal{B}$ & one extra euro of season budget & 0.094\\
+$y_\mathcal{D}$ & one extra vacation day & $\approx 0$\\
+\bottomrule
+\end{tabular}
+\caption{Largest dual values of Model 2's LP relaxation. Recovery spacing, not
+budget, is the scarce resource.}
+\label{tab:m2duals}
+\end{table}
 
 \subsection{Network-flow extension}
 
@@ -621,6 +682,56 @@ Model 3 (pacing) & LP & 15 & 7 & 1 ms\\
 \end{tabular}
 \caption{Model sizes and CBC solve times (baseline instances).}
 \label{tab:sizes}
+\end{table}
+
+\paragraph{Perturbing the cost vector $c$.} Sensitivity analysis of the
+objective coefficients completes the picture begun by the RHS ranging of
+Section~\ref{sec:m1duality}, and separates into the two standard cases.
+
+\emph{Case A --- coefficients of basic variables.} In Model~1 the objective
+$p_T = k_1 \text{CTL}_T - k_2 \text{ATL}_T$ has exactly two nonzero cost
+coefficients, both of them hard to measure physiologically. Bisecting outward
+from the baseline until the optimal plan changes gives the stability intervals
+$k_1 \in [0.68,\, 1.56]$ and $k_2 \in [1.29,\, 2.95]$: the entire optimal
+training plan --- all 144 hour variables --- is invariant to a $\pm 50\%$
+misestimation of either Banister weight. The plan therefore does not rest on
+the least defensible numbers in the model.
+
+\emph{Case B --- coefficients of non-basic variables.} In Model~2 the cost
+coefficients are the race values $v_i$, and selection plays the role of basis
+membership. For each race, bisection locates the critical perturbation at which
+the optimal calendar changes (Table~\ref{tab:costrange}). Selected domestic
+races (R01, R02, R03, R05, R07) can lose their \emph{entire} value without
+leaving the calendar --- they are cheap enough that the budget never rules them
+out --- whereas the marginal picks (Nafplio, Budapest, Costa Navarino) sit only
+$9.95$ points above expulsion. Symmetrically, the rejected races closest to
+entering (Nice 70.3, the Hellenic Championship, Valencia) need exactly $+9.95$:
+the matching thresholds reveal a near-tie in which one entering race displaces
+another, which is precisely the degeneracy that made the LP relaxation split
+those variables at $\tfrac12$ in Section~\ref{sec:m2results}.
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{llrr}
+\toprule
+Race & Role & Value & Allowed change\\
+\midrule
+R01 Attica Sprint & selected (basic) & 45.1 & $-45.11$ (any)\\
+R02 TRIMORE Rethymno & selected (basic) & 83.8 & $-83.84$ (any)\\
+R09 Nafplio Olympic & selected (basic) & 47.9 & $-9.95$\\
+R11 IM 70.3 Budapest & selected (basic) & 104.7 & $-9.95$\\
+R14 IM 70.3 Costa Navarino & selected (basic) & 117.7 & $-9.95$\\
+\midrule
+R08 IM 70.3 Nice & rejected (non-basic) & 115.7 & $+9.95$\\
+R13 Hellenic Champs & rejected (non-basic) & 94.7 & $+9.95$\\
+R16 MTRI Valencia & rejected (non-basic) & 50.0 & $+9.95$\\
+R15 Chicago Triathlon & rejected (non-basic) & 87.0 & $+121.00$\\
+\bottomrule
+\end{tabular}
+\caption{Objective-coefficient ranging in Model 2: how far each race's value
+may move before the optimal calendar changes (full table in
+\texttt{results/tables/model2\_cost\_ranging.csv}).}
+\label{tab:costrange}
 \end{table}
 
 \paragraph{Fatigue weight $k_2$.} Sweeping $k_2 \in [1,3]$ barely moves race-day
