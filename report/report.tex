@@ -38,7 +38,11 @@ relaxation gaps, and a network-flow reduction with an empirical total-unimodular
 demonstration. Several optimal solutions reproduce established coaching wisdom
 (build-then-taper periodization, ``steady bike, hard run'' pacing) without it being
 imposed, while sensitivity analysis reveals which recommendations are driven by the
-objective and which by the constraints.
+objective and which by the constraints. A final integration step shows that the
+three models are coherent only when the race-day energy budget depends on form
+rather than fitness alone --- which makes the training objective derived rather
+than assumed --- and resolves the circular dependency between training plan and
+race calendar by iterating to a fixed point.
 \end{abstract}
 
 \section{Introduction and Motivation}
@@ -54,10 +58,14 @@ minimize finishing time.
 These problems are usually solved by rules of thumb. This project instead treats
 them as mathematical programs and asks what an optimizer would do: Model~1 is an
 LP that allocates weekly training load; Model~2 is a 0--1 MIP that selects the race
-calendar; Model~3 is an LP that computes a pacing strategy. The three are coupled
-sequentially: Model~1's terminal fitness state is a readiness gate in Model~2 and
-determines the energy budget in Model~3
-(Fig.~\ref{fig:pipeline}).
+calendar; Model~3 is an LP that computes a pacing strategy. The three are
+coupled through the athlete's fitness state: Model~1's terminal CTL/ATL gates
+race readiness in Model~2 and sets the energy budget in Model~3
+(Fig.~\ref{fig:pipeline}). The coupling is genuinely circular --- the chosen
+A-race determines the macrocycle Model~1 should plan --- and
+Section~\ref{sec:coherence} resolves it by iterating to a fixed point rather
+than by fixing an order, and shows what the three objectives must satisfy to
+be mutually consistent.
 
 \begin{figure}[h]
 \centering
@@ -66,7 +74,9 @@ determines the energy budget in Model~3
 training load & & race calendar & & pacing strategy\\
 \emph{fitness state} & & \emph{which races?} & & \emph{how to race?}
 \end{tabular}
-\caption{The three-model pipeline. Arrows carry the CTL/ATL fitness state.}
+\caption{The three-model pipeline. Arrows carry the CTL/ATL fitness state; the
+A-race chosen by Model~2 feeds back into Model~1's macrocycle
+(Section~\ref{sec:coherence}).}
 \label{fig:pipeline}
 \end{figure}
 
@@ -776,14 +786,133 @@ constraint-determined, robust to the objective's calibration.}
 \label{fig:k2}
 \end{figure}
 
+\section{Integrating the Pipeline}
+\label{sec:coherence}
+
+Presenting three models in sequence raises two fair objections: that the
+models are only loosely coupled, and that the order of solution was chosen
+rather than justified. Both are addressed here.
+
+\subsection{Are the objectives coherent?}
+
+Model~1 maximizes a Banister performance index
+$p_T = k_1 \text{CTL}_T - k_2 \text{ATL}_T$, whereas the quantity the athlete
+actually cares about is the finishing time Model~3 computes. These need not
+agree --- and by default they do not. Model~3's energy budget
+$E = k_E \text{CTL}_T$ does not involve $\text{ATL}$ at all, so as far as
+Model~3 is concerned the ideal preparation is maximal fitness at \emph{any}
+level of fatigue, i.e.\ no taper. The disagreement is easy to miss while the
+models are solved separately, but it is stark once they are composed: pushing
+four materially different Model~1 plans through Model~3 returns \emph{exactly
+the same} race time of 140.18 min for all four (Table~\ref{tab:coherence}).
+With a fitness-only budget the pacing model is simply blind to the training
+decision, and the ``pipeline'' does not really transmit anything.
+
+Making the budget depend on race-day \emph{form} repairs this. Let
+\[
+E(\text{plan}) \;=\; E_{\text{base}} + k_E\bigl(\text{CTL}_T - \lambda\,\text{ATL}_T\bigr).
+\]
+If $\lambda = k_2/k_1$ then $E = E_{\text{base}} + (k_E/k_1)\, p_T$, an
+increasing affine function of Model~1's objective. Since Model~3's optimal time
+is non-increasing in $E$ (verified as a monotonicity test), it follows that
+\[
+\arg\max p_T \;=\; \arg\max E \;=\; \arg\min \text{race time}.
+\]
+Model~1's objective is then not a proxy but a \emph{derived} one, and the ratio
+$k_2/k_1$ ceases to be a free parameter: it is the fatigue sensitivity of the
+energy budget. Empirically the two rankings coincide exactly under
+$\lambda = k_2/k_1$ and fail to coincide under $\lambda = 0$
+(Fig.~\ref{fig:coherence}).
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{rrrrr}
+\toprule
+& & \multicolumn{2}{c}{coherent ($\lambda = 1.5$)} & fitness-only ($\lambda = 0$)\\
+$\text{CTL}_T$ & $\text{ATL}_T$ & $p_T$ & race time & race time\\
+\midrule
+91.95 & 57.55 & 5.62 & 163.68 & 140.18\\
+88.99 & 52.25 & 10.61 & 142.14 & 140.18\\
+81.64 & 46.54 & \textbf{11.83} & \textbf{140.18} & 140.18\\
+75.42 & 44.44 & 8.77 & 147.64 & 140.18\\
+\bottomrule
+\end{tabular}
+\caption{Four distinct training plans scored end-to-end. Under the coherent
+budget the plan with the largest $p_T$ is the fastest; under the fitness-only
+budget every plan yields the same time, so Model 3 cannot see the training
+decision at all.}
+\label{tab:coherence}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=.92\textwidth]{coherence.png}
+\caption{Model 1's objective against end-to-end predicted race time. Left:
+$\lambda = k_2/k_1$ gives a strictly monotone relationship. Right: the
+fitness-only budget does not.}
+\label{fig:coherence}
+\end{figure}
+
+There is one feasibility condition: $E > 0$ requires
+$\lambda < \text{CTL}_T/\text{ATL}_T$, which at the optimum is
+$81.64/46.54 = 1.75$. The value assumed throughout, $k_2 = 2.0$, therefore
+\emph{cannot} be made coherent --- it implies a negative energy budget. This is
+exactly where the objective-coefficient ranging of
+Section~\ref{sec:sensitivity} becomes load-bearing: the optimal plan is
+invariant for $k_2 \in [1.29, 2.95]$, so any $\lambda \in [1.29, 1.75)$ is
+simultaneously coherent, feasible, and plan-preserving. Setting
+$\lambda = k_2 = 1.5$ makes the whole system consistent while changing not a
+single one of the 144 optimal hour variables. The sensitivity analysis is not
+decorative here; it is what licenses the repair.
+
+\subsection{Resolving the circular dependency}
+
+The second objection is that the solution order was imposed. Model~1 needs a
+goal race --- the A-race's distance class fixes the macrocycle length and
+volume ceiling --- while Model~2 needs a fitness trajectory, since its readiness
+gate is driven by the sustained load Model~1 produces. Each is an input to the
+other.
+
+Rather than assert an order, we iterate to a fixed point: solve Model~1 under
+the macrocycle implied by the current A-race class, pass its average build-phase
+load $\bar L$ into Model~2's readiness projection, re-solve Model~2, and take
+the distance class of the selected A-race as the next macrocycle. The iteration
+converged in two steps (Table~\ref{tab:loop}), and it immediately exposed an
+inconsistency in the sequential presentation: the optimal calendar selects a
+70.3 as the season's A-race, which calls for a 20-week build, whereas the
+original analysis assumed a 16-week Olympic macrocycle. The self-consistent
+plan is a 20-week 70.3 macrocycle aimed at Costa Navarino --- which is, fittingly,
+the race the athlete actually contested in 2025.
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{clrlrr}
+\toprule
+Iter. & Macrocycle & Weeks & Selected A-race & Season value & Outcome\\
+\midrule
+1 & olympic & 16 & R14 Costa Navarino (70.3) & 571.7 & re-plan as 70.3\\
+2 & 70.3 & 20 & R14 Costa Navarino (70.3) & 571.7 & fixed point\\
+\bottomrule
+\end{tabular}
+\caption{Model 1 $\leftrightarrow$ Model 2 iteration. The circular dependency
+is resolved by convergence rather than by assumption.}
+\label{tab:loop}
+\end{table}
+
+Both results are reported as an integration layer rather than folded into the
+baseline: the shipped default remains $\lambda = 0$, so every figure and
+validation elsewhere in this report is unaffected and independently checkable.
+
 \section{Discussion and Limitations}
 
 Three modeling limitations deserve honesty. First, the weekly Banister recursion
 is a coarse time step; daily dynamics would shift constants slightly, though not
-the structure of the optimum. Second, the pipeline is sequential rather than
-jointly optimal: Model~1's plan is fixed before Model~2 selects races, whereas a
-joint model would co-optimize the macrocycle with the calendar (a substantially
-larger MIP --- a natural extension). Third, several Model~2/3 parameters
+the structure of the optimum. Second, the pipeline is solved by
+decomposition rather than as one joint program: Section~\ref{sec:coherence}
+replaces the fixed solution order with a fixed-point iteration and shows the
+objectives can be made coherent, but a single monolithic model co-optimizing
+macrocycle and calendar would still be a substantially larger MIP --- a natural
+extension. Third, several Model~2/3 parameters
 (race values, zone speeds, the energy--CTL constant $k_E$) are constructed from
 documented assumptions rather than measured; the sensitivity analyses show which
 conclusions survive parameter perturbation. The relay variant mentioned in the
