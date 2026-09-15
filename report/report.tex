@@ -317,6 +317,17 @@ race (sprint 1, Olympic 2, 70.3 4 weeks); at least one championship-quality
 class-specific requirement by race week, which excludes the high-value but
 too-early Dubai 70.3.
 
+Each side constraint instantiates a standard integer-modeling template. The
+pairwise recovery rows $x_i + x_j \le 1$ are the ``at most one of two''
+(either--or) pattern; the clique inequalities added below generalize it to
+``at most one of $k$''; the A-race row $\sum_{i \in A} x_i \ge 1$ is the
+``at least one of $N$'' (set-covering) pattern; the monthly caps are
+``at most $M$ of $N$''; and the readiness gate is variable fixing,
+$x_i = 0$, derived from Model~1 rather than assumed. Keeping every logical
+condition in one of these linear forms is what allows the model to remain a
+pure 0--1 program solvable by Branch \& Bound, with no big-$M$ terms and hence
+no weak-relaxation penalty.
+
 \subsection{Results}
 
 \label{sec:m2results}
