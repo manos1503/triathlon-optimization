@@ -26,7 +26,7 @@ def _shade_phases(ax):
     for name, (lo, hi) in PHASES.items():
         ax.axvspan(lo - 0.5, hi + 0.5, color=PHASE_COLOR[name], alpha=0.5, zorder=0)
         ax.text((lo + hi) / 2, ax.get_ylim()[1] * 0.97, name,
-                ha="center", va="top", fontsize=9, color="#334155")
+                ha="center", va="top", fontsize=14, color="#334155")
 
 
 def plot_weekly_hours(plan: pd.DataFrame, path: Path):

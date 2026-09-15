@@ -1,0 +1,14 @@
+# Figures are embedded at ~50-60% of text width in the report, so they are
+# authored with large fonts to stay legible after scaling.
+font.size:           17
+axes.titlesize:      18
+axes.labelsize:      17
+xtick.labelsize:     15
+ytick.labelsize:     15
+legend.fontsize:     14
+figure.titlesize:    19
+lines.linewidth:     2.4
+lines.markersize:    7
+axes.grid:           False
+savefig.bbox:        tight
+savefig.dpi:         150

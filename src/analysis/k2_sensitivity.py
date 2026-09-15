@@ -53,7 +53,7 @@ def plot(df: pd.DataFrame, path):
     ax.plot(df["k2"], df["race_day_tsb"], "o-", color="#2563eb")
     ax.axhspan(*TSB_BAND, color="#bbf7d0", alpha=0.5, label="coaching band (+15..+25)")
     ax.axvline(2.0, color="#94a3b8", ls="--", lw=1)
-    ax.annotate("baseline k2=2", (2.0, df["race_day_tsb"].min()), fontsize=9,
+    ax.annotate("baseline k2=2", (2.0, df["race_day_tsb"].min()), fontsize=14,
                 textcoords="offset points", xytext=(6, 4), color="#475569")
     ax.set_xlabel("Fatigue weight $k_2$ (with $k_1 = 1$)")
     ax.set_ylabel("Optimal race-day TSB")

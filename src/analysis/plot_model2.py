@@ -28,12 +28,12 @@ def plot_calendar(sel: pd.DataFrame, path: Path):
         if r["selected"]:
             ax.scatter(r["week"], y, s=180, color=color, zorder=3, edgecolor="black", lw=1.2)
             ax.annotate(r["id"], (r["week"], y), textcoords="offset points",
-                        xytext=(0, 12), ha="center", fontsize=9, fontweight="bold")
+                        xytext=(0, 12), ha="center", fontsize=14, fontweight="bold")
         else:
             marker = "x" if not r["ready"] else "o"
             ax.scatter(r["week"], y, s=70, color=color, alpha=0.35, marker=marker, zorder=2)
             ax.annotate(r["id"], (r["week"], y), textcoords="offset points",
-                        xytext=(0, -16), ha="center", fontsize=7, color="#94a3b8")
+                        xytext=(0, -16), ha="center", fontsize=12, color="#94a3b8")
 
     ax.set_yticks(list(CLASS_Y.values()), list(CLASS_Y.keys()))
     ax.set_ylim(-0.7, 2.7)

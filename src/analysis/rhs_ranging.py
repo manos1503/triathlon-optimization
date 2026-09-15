@@ -45,7 +45,7 @@ def plot(df: pd.DataFrame, path):
     fig, ax = plt.subplots(figsize=(8, 4.5))
     ax.plot(df["weekly_hours_max"], df["objective"], "o-", color="#2563eb")
     ax.axvline(12, color="#94a3b8", ls="--", lw=1)
-    ax.annotate("baseline (12h)", (12, df["objective"].min()), fontsize=9,
+    ax.annotate("baseline (12h)", (12, df["objective"].min()), fontsize=14,
                 textcoords="offset points", xytext=(6, 4), color="#475569")
     ax.set_xlabel("Weekly hours ceiling $H^{max}$")
     ax.set_ylabel("Optimal race-day performance $p_T$")

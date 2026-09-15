@@ -55,7 +55,7 @@ def plot(df: pd.DataFrame, path):
     ax.plot(df["budget_eur"], df["z_lp"], "o--", ms=4, color="#16a34a",
             label="LP relaxation (concave upper bound)")
     ax.axvline(2500, color="#94a3b8", ls="--", lw=1)
-    ax.annotate("baseline budget", (2500, df["z_mip"].min()), fontsize=9,
+    ax.annotate("baseline budget", (2500, df["z_mip"].min()), fontsize=14,
                 textcoords="offset points", xytext=(6, 4), color="#475569")
     ax.set_xlabel("Season budget (EUR)")
     ax.set_ylabel("Optimal season value")

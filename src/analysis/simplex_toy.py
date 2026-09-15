@@ -73,7 +73,7 @@ def plot(path):
     for name, (x, y) in vs.items():
         if y >= -1e-9 and x >= -1e-9:
             ax.plot(x, y, "ko", ms=6)
-            ax.annotate(f"{name}\n$t={x+y:.1f}$ min", (x, y), fontsize=9,
+            ax.annotate(f"{name}\n$t={x+y:.1f}$ min", (x, y), fontsize=14,
                         textcoords="offset points", xytext=(8, 6))
 
     # objective level set through the optimum
@@ -87,7 +87,7 @@ def plot(path):
     ax.set_xlabel("$t_3$ (min at Z3)")
     ax.set_ylabel("$t_5$ (min at Z5)")
     ax.set_title("Two-zone pacing toy LP — graphical solution")
-    ax.legend(fontsize=8, loc="upper right")
+    ax.legend(fontsize=13, loc="upper right")
     fig.tight_layout()
     fig.savefig(path, dpi=150)
     plt.close(fig)

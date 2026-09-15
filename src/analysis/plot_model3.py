@@ -34,12 +34,12 @@ def plot_pacing(plan: pd.DataFrame, path: Path):
             w = per.loc[leg, z]
             if w > 3:
                 ax.text(left[leg] + w / 2, leg, f"{z}\n{w:.0f}'", ha="center",
-                        va="center", fontsize=8)
+                        va="center", fontsize=13)
         left += per[z]
     ax.set_xlabel("Minutes")
     ax.set_title("Model 3 — optimal pacing: time in zone per leg "
                  f"(total {plan['minutes'].sum():.0f}' + transitions)")
-    ax.legend(loc="lower right", ncols=5, fontsize=8)
+    ax.legend(loc="lower right", ncols=5, fontsize=13)
     ax.invert_yaxis()
     fig.tight_layout()
     fig.savefig(path, dpi=150)
