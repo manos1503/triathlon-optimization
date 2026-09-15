@@ -9,6 +9,20 @@
 \definecolor{linkblue}{RGB}{30,60,140}
 \usepackage[colorlinks=true,linkcolor=linkblue,citecolor=linkblue,urlcolor=linkblue]{hyperref}
 \usepackage{microtype}
+\usepackage{listings}
+\lstdefinestyle{py}{
+  language=Python, basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{linkblue}\bfseries, commentstyle=\color{gray}\itshape,
+  stringstyle=\color{teal}, numbers=left, numberstyle=\tiny\color{gray},
+  numbersep=6pt, frame=single, rulecolor=\color{gray!40}, framesep=3pt,
+  breaklines=true, showstringspaces=false, columns=fullflexible,
+  aboveskip=6pt, belowskip=4pt, xleftmargin=14pt,
+}
+\lstdefinestyle{out}{
+  basicstyle=\ttfamily\scriptsize, frame=single, rulecolor=\color{gray!40},
+  breaklines=true, columns=fullflexible, aboveskip=6pt, belowskip=4pt,
+  xleftmargin=2pt, framesep=3pt,
+}
 
 \graphicspath{{../results/figures/}}
 \captionsetup{font=small,labelfont=bf,skip=4pt}
@@ -88,6 +102,15 @@ A-race chosen by Model~2 feeds back into Model~1's macrocycle
 (Section~\ref{sec:coherence}).}
 \label{fig:pipeline}
 \end{figure}
+
+All three models are implemented in Python with PuLP as the modelling layer and
+CBC as the solver. The solution procedure, the code itself and the resulting
+console output are documented in the appendices: Appendix~\ref{sec:code} lists
+the PuLP formulation of each model as extracted from the source files,
+Appendix~\ref{sec:output} reproduces the verbatim solver output, and
+Appendix~\ref{sec:filemap} maps every figure and table in this report to the
+module that generates it. The entire set of results is reproducible with one
+command, \texttt{python -m src.run\_all}.
 
 Two features distinguish the project from a textbook exercise. First, all inputs of
 Model~1 are estimated from the author's real training history; the numbers below
@@ -1074,6 +1097,84 @@ Operations Research}, 10th ed., McGraw-Hill, 2015.
 
 \appendix
 \small
+\section{Appendix: Implementation}
+\label{sec:code}
+
+All three models are implemented in Python with PuLP as the modelling layer and
+CBC as the solver, matching the toolchain used in the course. The listings below
+are extracted directly from the repository files, so they are the code that
+produced every number in this report. The full sources, the data pipeline and
+the 57-test suite are in the repository.
+
+\subsection{Model 1 --- training-load LP (\texttt{src/models/model1\_training.py})}
+
+Variable construction, the Banister dynamics as linear equalities, the
+constraint block and the objective:
+
+\lstinputlisting[style=py, firstnumber=42, linerange={42-107}]%
+{../src/models/model1_training.py}
+
+\subsection{Model 2 --- race-calendar MIP (\texttt{src/models/model2\_calendar.py})}
+
+Binary variables, the two knapsack rows, the monthly caps, the pairwise recovery
+conflicts, the A-race set-covering row and the readiness fixing:
+
+\lstinputlisting[style=py, firstnumber=97, linerange={97-148}]%
+{../src/models/model2_calendar.py}
+
+\subsection{Model 3 --- pacing LP (\texttt{src/models/model3\_pacing.py})}
+
+The zone-discretized time variables, distance coverage with the bike$\to$run
+coupling, the energy budget (fitness-only or form-based) and the intensity caps:
+
+\lstinputlisting[style=py, firstnumber=90, linerange={90-149}]%
+{../src/models/model3_pacing.py}
+
+\section{Appendix: Program Output}
+\label{sec:output}
+
+Verbatim console output of the three solvers, produced by running the commands
+shown. Everything reported in the body of this document can be regenerated with
+a single command, \texttt{python -m src.run\_all}, which additionally rebuilds
+all figures and result tables.
+
+\lstinputlisting[style=out]{../results/run_output.txt}
+
+\section{Appendix: Where Each Result Comes From}
+\label{sec:filemap}
+
+\begin{table}[h]
+\centering\footnotesize
+\begin{tabular}{llp{6.1cm}}
+\toprule
+Result & Produced by & Output\\
+\midrule
+Data pipeline & \texttt{src/pipeline/run\_pipeline.py} & \texttt{fitness\_state.yaml}, \texttt{trimp\_rates.csv}\\
+Model 1 solve (Fig.~\ref{fig:m1traj}, \ref{fig:m1hours}) & \texttt{src/models/run\_model1.py} & \texttt{model1\_plan.csv}, \texttt{model1\_trajectory.csv}\\
+RHS ranging (Fig.~\ref{fig:m1rhs}) & \texttt{src/analysis/rhs\_ranging.py} & \texttt{model1\_rhs\_ranging.csv}\\
+Shadow prices & \texttt{src/analysis/shadow\_prices.py} & \texttt{model1\_shadow\_prices.csv}\\
+Alternative optima & \texttt{src/analysis/alt\_optima.py} & \texttt{model1\_alt\_optima\_summary.csv}\\
+Heuristic benchmark & \texttt{src/analysis/heuristic\_benchmark.py} & \texttt{model1\_heuristic\_benchmark.csv}\\
+Actual vs optimal (Fig.~\ref{fig:actual}) & \texttt{src/analysis/actual\_vs\_optimal.py} & \texttt{model1\_actual\_vs\_optimal.csv}\\
+Model 2 solve (Fig.~\ref{fig:m2cal}) & \texttt{src/models/run\_model2.py} & \texttt{model2\_selection.csv}, \texttt{model2\_lp\_duals.csv}\\
+Budget sweep (Fig.~\ref{fig:m2budget}) & \texttt{src/analysis/budget\_sweep.py} & \texttt{model2\_budget\_sweep.csv}\\
+Clique cuts & \texttt{src/analysis/clique\_cuts.py} & \texttt{model2\_clique\_cuts.csv}\\
+Network flow & \texttt{src/analysis/network\_flow.py} & \texttt{model2\_network\_flow.csv}\\
+Model 3 solve (Fig.~\ref{fig:m3pacing}) & \texttt{src/models/run\_model3.py} & \texttt{model3\_pacing\_plan.csv}, \texttt{model3\_duals.csv}\\
+FTP/CTL sweeps (Fig.~\ref{fig:m3sweeps}) & \texttt{src/analysis/ftp\_sweep.py} & \texttt{model3\_ftp\_sweep.csv}\\
+Race validation (Tab.~\ref{tab:threeraces}) & \texttt{src/analysis/race\_validation.py} & \texttt{model3\_race\_validation.csv}\\
+Distance scenarios (Fig.~\ref{fig:distance}) & \texttt{src/analysis/distance\_scenarios.py} & \texttt{model1\_distance\_scenarios.csv}\\
+Cost ranging (Tab.~\ref{tab:costrange}) & \texttt{src/analysis/cost\_ranging.py} & \texttt{model1/2\_cost\_ranging.csv}\\
+$k_2$ sensitivity (Fig.~\ref{fig:k2}) & \texttt{src/analysis/k2\_sensitivity.py} & \texttt{model1\_k2\_sensitivity.csv}\\
+Coherence (Fig.~\ref{fig:coherence}) & \texttt{src/analysis/coherence.py} & \texttt{coherence\_*.csv}\\
+Fixed point (Tab.~\ref{tab:loop}) & \texttt{src/analysis/pipeline\_loop.py} & \texttt{pipeline\_loop.csv}\\
+Simplex example (Fig.~\ref{fig:toy}) & \texttt{src/analysis/simplex\_toy.py} & \texttt{simplex\_toy.png}\\
+\bottomrule
+\end{tabular}
+\caption{Mapping from every reported result to the module that generates it.}
+\label{tab:filemap}
+\end{table}
+
 \section{Appendix: the Simplex Method on a Reduced Instance}
 
 CBC solves every LP in this project with the (dual) Simplex algorithm. To make

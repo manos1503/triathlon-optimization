@@ -1,0 +1,71 @@
+$ python -m src.models.run_model1
+[model1] status=Optimal  objective p_T=-11.44
+[model1] start: CTL=78.1 ATL=91.46
+ week  load  hours   ctl   atl   tsb
+    1 845.5   10.8  84.7 110.0 -13.4
+    2 770.0    8.6  88.5 110.0 -25.3
+    3 770.0    8.6  91.8 110.0 -21.5
+    4 770.0   10.6  94.6 110.0 -18.2
+    5 770.0   10.8  97.0 110.0 -15.4
+    6 770.0   10.8  99.0 110.0 -13.0
+    7 770.0   10.7 100.7 110.0 -11.0
+    8 770.0    9.9 102.1 110.0  -9.3
+    9 770.0   11.0 103.3 110.0  -7.9
+   10 770.0    9.5 104.3 110.0  -6.7
+   11 770.0    9.9 105.2 110.0  -5.7
+   12 770.0    9.1 105.9 110.0  -4.8
+   13 770.0    9.8 106.6 110.0  -4.1
+   14 302.5    4.5  96.8  67.8  -3.4
+   15 302.5    4.5  88.6  52.3  29.1
+   16 302.5    4.5  81.6  46.5  36.4
+[model1] avg weekly hours 9.0, race-day CTL=81.6 ATL=46.5 TSB=35.1
+
+$ python -m src.models.run_model2
+[model2] MIP z=571.7  LP relaxation z=600.5  gap 5.04%
+[model2] budget 2250/2500 EUR, vacation days 11/12, 8 races selected, 1 excluded by readiness
+
+selected calendar:
+ id                               name       date distance_class  cost      value
+R01      Attica Sprint (season opener) 2027-03-14         sprint    45  45.106667
+R02         TRIMORE Rethymno Triathlon 2027-04-18        olympic   290  83.838333
+R03              TRIMORE Syros Olympic 2027-05-09        olympic   210  56.638333
+R05          Epidavros Legacy Standard 2027-06-06        olympic    60  69.120000
+R07                Thessaloniki Sprint 2027-06-27         sprint   160  46.636667
+R09                    Nafplio Olympic 2027-07-18        olympic   135  47.950000
+R11              Ironman 70.3 Budapest 2027-08-22           70.3   770 104.727513
+R14 Ironman 70.3 Greece Costa Navarino 2027-09-26           70.3   580 117.652085
+
+fractional in LP relaxation (rounded off by B&B):
+ id                               name      x
+R08                  Ironman 70.3 Nice 0.1828
+R09                    Nafplio Olympic 0.8172
+R10              London T100 Age-Group 0.1828
+R11              Ironman 70.3 Budapest 0.5000
+R12                 Copenhagen Olympic 0.5000
+R13            Hellenic Champs Olympic 0.5000
+R14 Ironman 70.3 Greece Costa Navarino 0.5000
+R16               MTRI Valencia Sprint 0.5000
+
+LP-relaxation shadow prices:
+  budget: 0.0936
+  vacation_days: -0.0000
+
+$ python -m src.models.run_model3
+[model3] CTL=81.6 -> E_tot=9389 kJ
+[model3] total 140.4 min (swim 26.1 / bike 71.0 / run 39.8)
+ leg zone  minutes    km      kj
+swim   Z3    15.65  0.86 1060.94
+swim   Z4     6.02  0.36  473.26
+swim   Z5     4.41  0.28  386.43
+bike   Z3    71.02 40.00 4154.81
+ run   Z3    19.91  4.62 1419.92
+ run   Z5    19.91  5.38 1893.23
+
+shadow prices:
+   constraint  shadow_price                                          meaning
+    dist_swim       26.4183                   marginal min per extra swim km
+    dist_bike        2.5085                   marginal min per extra bike km
+     dist_run        6.3207                    marginal min per extra run km
+energy_budget       -0.0071 min saved per extra kJ of energy (fitness value)
+hard_cap_swim       -0.0505    min saved per unit relaxed swim intensity cap
+ hard_cap_run       -0.0764     min saved per unit relaxed run intensity cap

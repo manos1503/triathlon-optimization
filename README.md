@@ -18,7 +18,7 @@
 
 ## Overview
 
-This project applies Linear Programming (LP) and Integer Programming (IP) techniques to optimize three interconnected decision problems in triathlon — a multidisciplinary endurance sport combining swimming, cycling, and running. The models are built on real training data (~440 activities, 15-month Strava export) and cover the full scope of the course material.
+This project applies Linear Programming (LP) and Integer Programming (IP) techniques to optimize three interconnected decision problems in triathlon — a multidisciplinary endurance sport combining swimming, cycling, and running. The models are built on real training data (574 activities from a 15-month Strava export) and cover the full scope of the course material.
 
 ---
 
@@ -33,10 +33,10 @@ Optimal distribution of weekly training hours across the three disciplines (swim
 ### Model 2 — Optimal Race Calendar Selection (0-1 MIP)
 Binary selection of races within a competitive season, balancing race value against cost and recovery constraints.
 
-- **Objective:** Maximize total season "value" (ranking points, strategic importance, preference)
-- **Variables:** xᵢ ∈ {0,1} for each candidate race i
-- **Key constraints:** Total budget (entry fees + travel), maximum races per month, minimum recovery weeks between races, fitness-readiness link from Model 1
-- **Method:** Branch & Bound; LP relaxation vs. integer optimum compared
+- **Objective:** Maximize weather-risk-adjusted season "value" (ranking points, strategic importance, enjoyment, course suitability)
+- **Variables:** xᵢ ∈ {0,1} for each of 17 candidate races
+- **Key constraints:** Two-dimensional knapsack (money budget + vacation days), max races per month, recovery spacing between races, ≥1 A-race (set covering), fitness-readiness gate from Model 1
+- **Method:** Branch & Bound; LP relaxation compared (5.04% integrality gap), tightened to 3.38% with clique cuts
 
 ### Model 3 — Optimal Race Pacing Strategy (LP with Linearization)
 Optimal distribution of time across intensity zones per race leg, minimizing total finishing time.
@@ -44,6 +44,7 @@ Optimal distribution of time across intensity zones per race leg, minimizing tot
 - **Objective:** Minimize total race time
 - **Key constraints:** Total energy budget (from Model 1 fitness state), maximum intensity per leg, bike→run metabolic fatigue carry-over
 - **Linearization:** Non-linear speed/energy relationship discretized via intensity zones (Z1–5)
+- **In-race fuelling:** carbohydrate intake as a fixed rate or as a per-leg decision variable bounded by gut absorption (stays an LP)
 - **Extension:** Dual theory — shadow prices interpreted physiologically (e.g. "how much faster if FTP increases by 5W?")
 
 ---
@@ -61,11 +62,23 @@ Allocation             Selection              Optimization
 
 ## Course Topics Covered
 
-- LP and IP Modeling
-- Simplex Algorithm (Models 1 & 3)
-- Dual Theory & Sensitivity Analysis (Model 3)
-- Branch & Bound (Model 2)
-- Network Flow (Model 2 extension)
+- LP and IP modelling; standard integer-modelling templates (either–or, k-of-N, set covering, variable fixing)
+- Simplex algorithm (CBC; worked two-variable example in the report appendix)
+- Duality: explicit primal–dual pair, shadow-price interpretation, strong duality and complementary slackness verified numerically
+- Sensitivity analysis: RHS ranging **and** objective-coefficient ranging (basic / non-basic cases)
+- Branch & Bound, LP-relaxation gaps, clique cuts (valid inequalities)
+- Network models: longest path in a DAG, total unimodularity, Network Simplex structure
+
+---
+
+## Validation
+
+Model 3 is validated against three of the author's real races across the full
+distance spectrum — Spetsathlon 2026 (sprint), Epidavros 2025 (Olympic) and
+Ironman 70.3 Costa Navarino 2025 — with race-day fitness reconstructed from the
+data pipeline. Swim predictions land within 0.4 min in all three; the calibrated
+in-race fuelling rate independently recovers the standard 75 g carbs/hour
+guideline.
 
 ---
 
@@ -78,8 +91,10 @@ docs/              Mathematical formulations, athlete profile
 src/pipeline/      Strava → TRIMP → CTL/ATL data pipeline
 src/models/        PuLP implementations of Models 1–3
 src/analysis/      Sensitivity analysis and scenario runs
-results/           Figures and tables for the report
-report/            Final report (10–15 pages)
+src/run_all.py     One-command reproduction of every result
+tests/             57 tests (models, duality theorems, analyses)
+results/           Figures, tables and captured solver output
+report/            Final report (15 pp + appendices with code and output)
 presentation/      Slides (~20 min)
 ```
 
@@ -105,7 +120,7 @@ Python ≥3.10. Optimization via PuLP/CBC; data handling via pandas; plots via m
 
 ```bash
 python -m src.run_all    # pipeline -> Models 1-3 -> all analyses and figures
-python -m pytest tests/  # 44 tests
+python -m pytest tests/  # 57 tests
 ```
 
 Without the personal Strava export (`data/raw/activities.csv`, not committed),
