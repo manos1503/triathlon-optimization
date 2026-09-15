@@ -457,6 +457,21 @@ MIP. The flow LP returns an integral solution without any integrality constraint
 knapsack constraints are therefore precisely what breaks the network structure and
 forces Branch \& Bound in the full model.
 
+The flow formulation is also what makes the \emph{Network Simplex Method}
+applicable. Its constraint matrix is the node--arc incidence matrix of the DAG
+(one $+1$ and one $-1$ per arc column), so every basis corresponds to a
+spanning tree of the network and a pivot is an arc exchange --- entering arc in,
+leaving arc out --- performed by updating tree potentials rather than by
+factorizing a general basis matrix. Because the basis is always integral, the
+method terminates at an integral flow without any branching, which is the
+algorithmic counterpart of the total unimodularity verified above. The present
+instance (18 nodes --- 16 race-ready races plus source and sink --- and 136
+arcs) is far too small for the speed advantage to
+matter, so it is solved with CBC's general simplex; the point is structural,
+namely that the relaxed race-selection problem belongs to the class of problems
+Network Simplex is designed for, and leaves that class exactly when the two
+knapsack rows are added.
+
 \section{Model 3 --- Race Pacing Strategy (LP)}
 
 \subsection{Formulation}
