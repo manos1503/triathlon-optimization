@@ -128,23 +128,6 @@ Race day: $\text{TSB}=+35$.
 \end{columns}
 \end{frame}
 
-\begin{frame}{Model 1 --- alternative optima \& heuristic benchmark}
-\textbf{Alternative optima} (degeneracy made visible):
-fix $p_T = p^\ast$, re-solve min/max total hours
-\begin{center}
-same performance with \textbf{124.2h} or \textbf{162.3h} of season training
---- a 38h efficiency gap
-\end{center}
-\vspace{4pt}
-\textbf{vs.\ standard coaching heuristic} (fill available hours, 20/45/35 split, 80/15/5 intensity):
-\begin{itemize}
-  \item violates the fatigue ceiling in \textbf{13 of 16 weeks} (chronic overtraining)
-  \item $p_T = -69.5$ vs.\ optimal $-11.4$
-  \item but: heuristic race-day TSB $+21$ is inside the coaching band $+15..25$;
-        the LP's $+35$ is not $\to$ see $k_2$ sensitivity
-\end{itemize}
-\end{frame}
-
 \begin{frame}{Model 2 --- race-calendar selection (0--1 MIP)}
 \textbf{17 candidate races} (Greek / European / long-haul), binary $x_i$
 \[
@@ -188,6 +171,34 @@ Recovery forces National Champs vs.\ home 70.3 --- optimizer picks the 70.3.
   \item LP duals: 0.094 value/EUR, $\approx$0 per day off
 \end{itemize}
 \end{columns}
+\end{frame}
+
+\begin{frame}{Model 2 --- the dual problem}
+LP relaxation is already in standard form
+$\max\{c^{T}x \mid Ax \le b,\, x \ge 0\}$, so the dual is
+$\min\{b^{T}y \mid A^{T}y \ge c,\, y \ge 0\}$:
+\[
+\kappa_i y_\mathcal{B} + \delta_i y_\mathcal{D} + y_{\text{month}(i)}
++ \sum_{j} y_{ij} - [i \in A] y_A \;\ge\; v_i
+\]
+\begin{center}\small
+\emph{a race enters only if its value covers the shadow cost of what it consumes}
+\end{center}
+\begin{center}\small
+\begin{tabular}{llr}
+\toprule
+Dual & Meaning & Price\\
+\midrule
+$y_{13,14}$ & Hellenic Champs vs.\ Costa Navarino conflict & \textbf{56.40}\\
+$y_{06,07}$ & Hamburg vs.\ Thessaloniki conflict & 31.67\\
+$y_\mathcal{B}$ & one extra euro & 0.094\\
+$y_\mathcal{D}$ & one extra vacation day & $\approx 0$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\vspace{2pt}
+$\Rightarrow$ the scarce resource is neither money nor days off but
+\textbf{calendar space}: recovery between races.
 \end{frame}
 
 \begin{frame}{Model 2 --- network-flow extension}
@@ -305,69 +316,23 @@ measurable parameters
 \end{columns}
 \end{frame}
 
-\begin{frame}{Model 2 --- the dual problem}
-LP relaxation is already in standard form
-$\max\{c^{T}x \mid Ax \le b,\, x \ge 0\}$, so the dual is
-$\min\{b^{T}y \mid A^{T}y \ge c,\, y \ge 0\}$:
-\[
-\kappa_i y_\mathcal{B} + \delta_i y_\mathcal{D} + y_{\text{month}(i)}
-+ \sum_{j} y_{ij} - [i \in A] y_A \;\ge\; v_i
-\]
-\begin{center}\small
-\emph{a race enters only if its value covers the shadow cost of what it consumes}
-\end{center}
-\begin{center}\small
-\begin{tabular}{llr}
-\toprule
-Dual & Meaning & Price\\
-\midrule
-$y_{13,14}$ & Hellenic Champs vs.\ Costa Navarino conflict & \textbf{56.40}\\
-$y_{06,07}$ & Hamburg vs.\ Thessaloniki conflict & 31.67\\
-$y_\mathcal{B}$ & one extra euro & 0.094\\
-$y_\mathcal{D}$ & one extra vacation day & $\approx 0$\\
-\bottomrule
-\end{tabular}
-\end{center}
-\vspace{2pt}
-$\Rightarrow$ the scarce resource is neither money nor days off but
-\textbf{calendar space}: recovery between races.
-\end{frame}
-
-\begin{frame}{Integrating the pipeline (1): are the objectives coherent?}
-Model 1 maximizes $p_T = k_1\text{CTL}_T - k_2\text{ATL}_T$; the athlete wants
-\emph{race time}. Do they agree?
-\vspace{3pt}
-\begin{center}\small
-\begin{tabular}{rrrrr}
-\toprule
-& & \multicolumn{2}{c}{coherent ($\lambda=1.5$)} & fitness-only ($\lambda=0$)\\
-CTL$_T$ & ATL$_T$ & $p_T$ & time & time\\
-\midrule
-91.9 & 57.6 & 5.6 & 163.7 & 140.2\\
-89.0 & 52.3 & 10.6 & 142.1 & 140.2\\
-81.6 & 46.5 & \textbf{11.8} & \textbf{140.2} & 140.2\\
-75.4 & 44.4 & 8.8 & 147.6 & 140.2\\
-\bottomrule
-\end{tabular}
-\end{center}
-\vspace{2pt}
-\begin{itemize}
-  \item default budget $E = k_E\text{CTL}$ ignores ATL $\Rightarrow$
-        \textbf{all four plans give the same time} --- Model 3 is blind to training
-  \item form-based $E = E_{\text{base}} + k_E(\text{CTL}_T - \lambda \text{ATL}_T)$
+\begin{frame}{Integrating the pipeline: coherence + fixed point}
+\textbf{Do the objectives agree?} Model 1 maximizes
+$p_T = k_1\text{CTL}_T - k_2\text{ATL}_T$; the athlete wants \emph{race time}.
+\begin{itemize}\itemsep1pt
+  \item default budget $E = k_E\text{CTL}$ ignores ATL $\Rightarrow$ four
+        different plans all give \textbf{the same 140.2 min} --- Model 3 is blind
+        to training
+  \item form-based $E = E_{\text{base}} + k_E(\text{CTL}_T - \lambda\text{ATL}_T)$
         is affine in $p_T$ \textbf{iff} $\lambda = k_2/k_1$
         $\Rightarrow \arg\max p_T = \arg\min$ time
   \item $E>0$ needs $\lambda < \text{CTL}_T/\text{ATL}_T = 1.75$, so the assumed
-        $k_2=2$ is \emph{incoherent}; \textbf{cost ranging} says the plan is
-        invariant on $[1.29,2.95]$ --- so $\lambda=1.5$ fixes it \textbf{changing
-        no variable}
+        $k_2 = 2$ is \emph{incoherent}; cost ranging says the plan is invariant on
+        $[1.29, 2.95]$, so $\lambda = 1.5$ fixes it \textbf{changing no variable}
 \end{itemize}
-\end{frame}
-
-\begin{frame}{Integrating the pipeline (2): the circular dependency}
-Model 1 needs the A-race (sets macrocycle length); Model 2 needs Model 1's load
-(drives the readiness gate). Iterate instead of assuming an order:
-\vspace{4pt}
+\vspace{2pt}
+\textbf{Which comes first?} The A-race sets Model 1's macrocycle; Model 1's load
+drives Model 2's readiness gate. Iterate instead of assuming:
 \begin{center}\small
 \begin{tabular}{clrlr}
 \toprule
@@ -378,14 +343,9 @@ Iter. & Macrocycle & Weeks & Selected A-race & Outcome\\
 \bottomrule
 \end{tabular}
 \end{center}
-\vspace{4pt}
-\begin{itemize}
-  \item converges in \textbf{2 iterations}
-  \item exposes a real inconsistency: the calendar picks a \textbf{70.3} A-race,
-        which needs a \textbf{20-week} build --- not the 16-week Olympic
-        macrocycle originally assumed
-  \item the fixed point is Costa Navarino --- the race actually contested in 2025
-\end{itemize}
+\vspace{1pt}
+{\small Converges in 2 steps, and exposes that the calendar's 70.3 A-race needs a
+\textbf{20-week} build --- not the 16-week Olympic one originally assumed.}
 \end{frame}
 
 \begin{frame}{What the models actually recommend}
@@ -408,20 +368,6 @@ Iter. & Macrocycle & Weeks & Selected A-race & Outcome\\
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Limitations --- stated honestly}
-\begin{itemize}
-  \item \textbf{Weekly time step} for Banister dynamics (daily would shift constants,
-        not structure)
-  \item \textbf{Sequential pipeline}, not joint optimization --- co-optimizing
-        training + calendar is a natural (larger) MIP extension
-  \item \textbf{Constructed parameters} in Models 2--3 (race values, zone speeds,
-        $k_E$) --- documented assumptions; sensitivity analysis shows which
-        conclusions survive perturbation
-  \item LP's $+35$ TSB over-taper traced to race-week minimum constraints,
-        not to the model concept
-\end{itemize}
-\end{frame}
-
 \begin{frame}{Conclusions}
 \begin{itemize}
   \item Three coupled models on \textbf{real personal data}, spanning the syllabus:
@@ -437,6 +383,39 @@ Iter. & Macrocycle & Weeks & Selected A-race & Outcome\\
 \end{itemize}
 \vspace{8pt}
 \centering \Large Thank you! Questions?
+\end{frame}
+
+
+\appendix
+\begin{frame}{Backup: limitations --- stated honestly}
+\begin{itemize}
+  \item \textbf{Weekly time step} for Banister dynamics (daily would shift constants,
+        not structure)
+  \item \textbf{Sequential pipeline}, not joint optimization --- co-optimizing
+        training + calendar is a natural (larger) MIP extension
+  \item \textbf{Constructed parameters} in Models 2--3 (race values, zone speeds,
+        $k_E$) --- documented assumptions; sensitivity analysis shows which
+        conclusions survive perturbation
+  \item LP's $+35$ TSB over-taper traced to race-week minimum constraints,
+        not to the model concept
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Backup: alternative optima \& heuristic benchmark}
+\textbf{Alternative optima} (degeneracy made visible):
+fix $p_T = p^\ast$, re-solve min/max total hours
+\begin{center}
+same performance with \textbf{124.2h} or \textbf{162.3h} of season training
+--- a 38h efficiency gap
+\end{center}
+\vspace{4pt}
+\textbf{vs.\ standard coaching heuristic} (fill available hours, 20/45/35 split, 80/15/5 intensity):
+\begin{itemize}
+  \item violates the fatigue ceiling in \textbf{13 of 16 weeks} (chronic overtraining)
+  \item $p_T = -69.5$ vs.\ optimal $-11.4$
+  \item but: heuristic race-day TSB $+21$ is inside the coaching band $+15..25$;
+        the LP's $+35$ is not $\to$ see $k_2$ sensitivity
+\end{itemize}
 \end{frame}
 
 \end{document}
