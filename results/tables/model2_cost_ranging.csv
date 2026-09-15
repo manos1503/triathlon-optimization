@@ -1,0 +1,18 @@
+id,name,role,value,allowed_change,critical_value
+R00,Ironman 70.3 Dubai,rejected (non-basic),123.8,,
+R01,Attica Sprint (season opener),selected (basic),45.1,-45.11,0.0
+R02,TRIMORE Rethymno Triathlon,selected (basic),83.8,-83.84,0.0
+R03,TRIMORE Syros Olympic,selected (basic),56.6,-56.64,0.0
+R04,Ironman 70.3 Kraichgau,rejected (non-basic),94.7,81.04,175.7
+R05,Epidavros Legacy Standard,selected (basic),69.1,-69.12,0.0
+R06,World Triathlon AG Hamburg,rejected (non-basic),104.9,70.87,175.7
+R07,Thessaloniki Sprint,selected (basic),46.6,-46.64,0.0
+R08,Ironman 70.3 Nice,rejected (non-basic),115.7,9.95,125.6
+R09,Nafplio Olympic,selected (basic),47.9,-9.95,38.0
+R10,London T100 Age-Group,rejected (non-basic),87.1,38.46,125.6
+R11,Ironman 70.3 Budapest,selected (basic),104.7,-9.95,94.8
+R12,Copenhagen Olympic,rejected (non-basic),78.7,26.01,104.7
+R13,Hellenic Champs Olympic,rejected (non-basic),94.7,9.95,104.6
+R14,Ironman 70.3 Greece Costa Navarino,selected (basic),117.7,-9.95,107.7
+R15,Chicago Triathlon Olympic,rejected (non-basic),87.0,121.0,208.0
+R16,MTRI Valencia Sprint,rejected (non-basic),50.0,9.95,60.0

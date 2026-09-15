@@ -82,6 +82,7 @@ def main():
     import sys
     for mod in ("src.analysis.plot_model1", "src.analysis.plot_model2",
                 "src.analysis.plot_model3", "src.analysis.rhs_ranging",
+                "src.analysis.cost_ranging",
                 "src.analysis.shadow_prices", "src.analysis.alt_optima",
                 "src.analysis.heuristic_benchmark", "src.analysis.ftp_sweep",
                 "src.analysis.distance_scenarios", "src.analysis.budget_sweep",

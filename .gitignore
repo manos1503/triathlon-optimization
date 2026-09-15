@@ -19,3 +19,11 @@ venv/
 *.out
 *.toc
 *.synctex.gz
+
+# Course material from the instructor (not ours to redistribute)
+*_eclass.pdf
+intro-numpy-linalg-matplotlib-*.pdf
+1-solvers-*/
+
+# Local working notes / imported project instructions (contain private correspondence)
+AGENTS.md
