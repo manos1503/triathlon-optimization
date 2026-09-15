@@ -903,6 +903,72 @@ Both results are reported as an integration layer rather than folded into the
 baseline: the shipped default remains $\lambda = 0$, so every figure and
 validation elsewhere in this report is unaffected and independently checkable.
 
+\section{What the Models Recommend}
+\label{sec:recommendations}
+
+The models were built to be solved, but their purpose is to change decisions.
+This section collects the actionable output, each item traceable to a specific
+result rather than to coaching opinion.
+
+\paragraph{Train more, and much easier.} The sharpest finding is the gap
+between the optimal plan and what the athlete actually does. Over the last 16
+weeks of the export the realised training was 6.6\,h/week with $37\%$ of time at
+moderate-or-hard intensity; the optimum is 9.0\,h/week with $15\%$. The athlete
+trains \emph{less volume at roughly double the intensity share} --- the classic
+anti-polarised pattern. Both directions matter: the heuristic benchmark shows
+that simply filling the available hours at high intensity violates the fatigue
+ceiling in 13 of 16 weeks, so the recommendation is more easy volume, not more
+training.
+
+\paragraph{Recovery capacity, not free time, is the binding resource.} RHS
+ranging on the weekly-hours ceiling shows the objective saturating at
+10.5\,h/week: beyond that, extra available hours have zero shadow price because
+the ATL ceiling binds first (Section~\ref{sec:m1duality}). Buying more training
+time --- the athlete's instinctive lever --- is worthless here. What has positive
+value is anything that raises tolerable fatigue: sleep, nutrition, and load
+management. The ATL-ceiling duals peak in the late build phase, so that is when
+recovery investment pays most.
+
+\paragraph{Build endurance, not peak power.} The parametric sweeps answer the
+athlete's own question directly. Below the current FTP of 260\,W each watt is
+worth $\approx 6$\,s of Olympic-distance race time, but the marginal value
+collapses to nearly zero at 260--270\,W: with a fixed energy budget, extra power
+cannot be fuelled. One point of CTL, by contrast, is worth 69--84\,s up to
+$\text{CTL} \approx 85$. Time on the FTP test is misallocated effort; time
+building chronic load is not.
+
+\paragraph{Race day: ride steady, run hard, and pace the run evenly.} The
+optimal Olympic-distance strategy is the entire bike leg at Z3 and a run split
+between Z3 and the Z5 cap --- hard biking buys little speed on a cube-root curve
+while draining both the shared energy budget and, through the coupling term, the
+run. The 70.3 validation shows the cost of violating this: going out at
+$4{:}53$/km and fading to $5{:}52$/km with heart rate falling from 162 to
+145\,bpm cost roughly 29 minutes against the model's even-paced schedule.
+
+\paragraph{Fuel at the guideline rate, and train the gut.} The calibrated
+in-race intake of $\approx 21$\,kJ/min recovers the standard 75\,g of
+carbohydrate per hour. With fuelling as a decision the optimizer takes nothing
+in the water, the maximum on the bike, and less on the run --- and the absorption
+duals price gut training at $\approx 1.7$ minutes per additional kJ/min of bike
+absorption capacity at 70.3 distance, while the same capacity is worth almost
+nothing at Olympic distance. Gut training is a long-course intervention only.
+
+\paragraph{Race mostly at home, and protect the calendar.} Model 2 selects six
+of eight races domestically: cheap Greek races dominate on value per euro, and
+cost ranging shows several of them stay in the calendar even if their value
+falls to zero. The scarce resource is not money (0.094 per euro) or time off
+($\approx 0$ per day) but \emph{calendar space}: the recovery conflict between
+the Hellenic Championship and the Costa Navarino 70.3 carries a shadow price of
+56.4, the largest in the model. Scheduling decisions deserve more care than
+budget decisions.
+
+\paragraph{Two concrete calendar calls.} The early-season Dubai 70.3, despite
+high value, is correctly excluded --- the projected CTL cannot reach the 70.3
+readiness threshold by early March. And if the season's A-race is the Costa
+Navarino 70.3, the macrocycle should be the 20-week 70.3 build, not the 16-week
+Olympic one; this is precisely the inconsistency the fixed-point iteration of
+Section~\ref{sec:coherence} detected and corrected.
+
 \section{Discussion and Limitations}
 
 Three modeling limitations deserve honesty. First, the weekly Banister recursion
