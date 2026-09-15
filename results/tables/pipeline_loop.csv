@@ -1,0 +1,3 @@
+iteration,macrocycle_class,weeks,build_load_Lbar,a_race,a_race_name,a_race_class,n_races,season_value,race_day_ctl,status
+1,olympic,16,770.0,R14,Ironman 70.3 Greece Costa Navarino,70.3,8,571.7,81.6,-> re-plan as 70.3
+2,70.3,20,770.0,R14,Ironman 70.3 Greece Costa Navarino,70.3,8,571.7,82.7,FIXED POINT
