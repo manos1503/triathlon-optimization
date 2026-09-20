@@ -1,5 +1,5 @@
 # Athlete-specific parameters — single source of truth for all models.
-# Values estimated from the 15-month Strava export (Mar 2025 onward).
+# Values estimated from the Strava export (October 2023 to June 2026).
 
 athlete:
   name: "Emmanouil Vichos"
