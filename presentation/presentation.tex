@@ -1,4 +1,4 @@
-% Optimal Athletic Programming in Triathlon -- defence slides.
+% Optimal Resource Allocation and Scheduling of Athletic Activities -- defence slides.
 %
 % Two builds from this one source:
 %   pdflatex presentation.tex
@@ -39,10 +39,8 @@
   % Override on another machine, e.g. \def\notesfont{DejaVu Sans}
   \providecommand{\notesfont}{Helvetica}
   \newfontfamily\gr{\notesfont}
-  \makeatletter
-  \renewcommand{\speakernote}[1]{%
-    \@ifundefined{note@#1}{}{\note{\gr\@nameuse{note@#1}}}}
-  \makeatother
+  % speaker-notes.tex supplies both the notes and how they are emitted, so
+  % nothing about them ever requires editing this file.
   \IfFileExists{speaker-notes.tex}{\input{speaker-notes.tex}}{}
 \fi
 
@@ -97,7 +95,7 @@
   \item Strava export: \textbf{598 activities}, 574 usable
   \item Banister training impulse per activity
   \item Fitness CTL ($\tau{=}42$d), fatigue ATL ($\tau{=}7$d)
-  \item Today: CTL $78.1$, ATL $91.5$, \textbf{TSB $-13.4$}
+  \item Jun 2026: CTL $78.1$, ATL $91.5$, \textbf{TSB $-13.4$}
 \end{itemize}
 \column{.42\textwidth}
 \centering\small
@@ -181,7 +179,7 @@ $\cdot$ taper caps
 \begin{itemize}\itemsep6pt
   \item \textbf{two knapsacks:} $\le 2500$ EUR, $\le 12$ vacation days
   \item \textbf{recovery spacing:} $x_i + x_j \le 1$; $\le 2$ races/month; $\ge 1$ A-race
-  \item \textbf{readiness gate from Model 1:} projected CTL must reach the class
+  \item \textbf{readiness gate from Model 1:} projected CTL must reach the class minimum
 \end{itemize}
 \end{frame}
 
@@ -203,7 +201,7 @@ $\cdot$ taper caps
 \column{.46\textwidth}
 \begin{itemize}\itemsep8pt
   \item LP $600.5$ vs.\ MIP $571.7$:\\ \textbf{integrality gap 5.0\%}
-  \item 8 fractional variables; the champs/70.3 conflict splits \textbf{0.5/0.5}
+  \item 8 fractional variables; the Champs/70.3 conflict splits \textbf{0.5/0.5}
   \item \textbf{clique cuts} (Bron--Kerbosch): $600.5 \to 591.0$,\\
         gap \textbf{5.04\% $\to$ 3.38\%}
 \end{itemize}
@@ -278,7 +276,7 @@ $\phi(\gamma)$ from the power balance, \textbf{derived, not fitted}
 
 \speakernote{m3_model}
 
-\begin{frame}{Model 3 --- ``steady bike, hard run,'' derived}
+\begin{frame}{Model 3 --- the LP derives ``steady bike, hard run''}
 \centering
 \includegraphics[width=.70\textwidth]{model3_pacing.png}
 \takeaway{Bike entirely Z3. Energy budget exhausted \emph{exactly}: 9389 kJ.}
@@ -313,8 +311,8 @@ Epidavros '25 (Olympic) & 55.6 & 27.2 & 25.8 & 88.8 & 91.5 & 38.9 & 42.0\\
 \begin{itemize}\itemsep5pt
   \item swim within 0.5 min every time
   \item binding constraint \textbf{switches with distance}: speed caps $\to$ energy
-        $\to$ infeasible unfed
-  \item the 70.3 run: my \textbf{29-minute} wall is the energy constraint, violated in real life
+        $\to$ infeasible without fuelling
+  \item the 70.3 run: my \textbf{29-minute} wall is the energy constraint being violated in real life
 \end{itemize}
 \end{frame}
 
@@ -380,7 +378,7 @@ Costa Navarino (88.5 km) & 9.1 & 177.5 & \textbf{184.6} & 180.0 & 180.3\\
 \toprule
 Iter. & Macrocycle & Weeks & Selected A-race & Outcome\\
 \midrule
-1 & olympic & 16 & R14 Costa Navarino (70.3) & re-plan as 70.3\\
+1 & Olympic & 16 & R14 Costa Navarino (70.3) & re-plan as 70.3\\
 2 & 70.3 & 20 & R14 Costa Navarino (70.3) & \textbf{fixed point}\\
 \bottomrule
 \end{tabular}
@@ -407,7 +405,7 @@ Iter. & Macrocycle & Weeks & Selected A-race & Outcome\\
 \begin{itemize}\itemsep10pt
   \item Three coupled models on \textbf{real personal data}
   \item Spanning the syllabus: LP \& Simplex, duality \& sensitivity,
-        IP \& Branch \& Bound, network flows \& total unimodularity
+        IP with Branch \& Bound, network flows \& total unimodularity
   \item The optimizer \textbf{re-derives coaching wisdom} --- periodization,
         polarization, ``steady bike, hard run''
   \item Duals name the real bottlenecks: \emph{recovery}, \emph{calendar space},
@@ -424,34 +422,5 @@ Iter. & Macrocycle & Weeks & Selected A-race & Outcome\\
 \end{frame}
 
 \speakernote{conclusions}
-
-% ---------------------------------------------------------------- backup
-\appendix
-\begin{frame}{Backup: limitations}
-\begin{itemize}\itemsep8pt
-  \item \textbf{Weekly} time step for the Banister dynamics
-  \item \textbf{Sequential} pipeline, not joint optimization
-  \item \textbf{Constructed parameters} in Models 2--3 (race values, zone speeds, $k_E$)
-  \item The LP's $+35$ TSB over-taper --- traced to race-week minimums
-\end{itemize}
-\end{frame}
-
-\speakernote{backup_limitations}
-
-\begin{frame}{Backup: alternative optima \& heuristic benchmark}
-\textbf{Alternative optima:} fix $p_T = p^\ast$, re-solve min/max total hours
-\begin{center}
-same performance with \textbf{124.2 h} or \textbf{162.3 h} of season training
-\end{center}
-\vspace{8pt}
-\textbf{vs.\ a standard coaching heuristic:}
-\begin{itemize}\itemsep5pt
-  \item violates the fatigue ceiling in \textbf{13 of 16 weeks}
-  \item $p_T = -69.5$ vs.\ optimal $-11.4$
-  \item but its race-day TSB $+21$ is inside the coaching band; the LP's $+35$ is not
-\end{itemize}
-\end{frame}
-
-\speakernote{backup_alternatives}
 
 \end{document}
