@@ -22,7 +22,7 @@ than a calibrated constant.
 Two model variants are compared:
 
     flat      the baseline speed curve (35 km/h at FTP on a flat course)
-    gradient  reference speed scaled by (1 - c * m/km), c = 0.014
+    gradient  reference speed scaled by (1 - c * m/km), c = 0.008
 
 c and k_E were fitted jointly on the three races (official distances). The gradient variant roughly
 halves the total bike error, and — more importantly — removes its systematic
