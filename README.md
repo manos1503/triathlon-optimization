@@ -20,7 +20,7 @@
 
 ## Overview
 
-This project applies Linear Programming (LP) and Integer Programming (IP) techniques to optimize three interconnected decision problems in triathlon — a multidisciplinary endurance sport combining swimming, cycling, and running. The models are built on real training data (574 activities from a 15-month Strava export) and cover the full scope of the course material.
+This project applies Linear Programming (LP) and Integer Programming (IP) techniques to optimize three interconnected decision problems in triathlon — a multidisciplinary endurance sport combining swimming, cycling, and running. The models are built on real training data (574 activities from a 32-month Strava export) and cover the full scope of the course material.
 
 ---
 
