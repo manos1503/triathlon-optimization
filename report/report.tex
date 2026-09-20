@@ -763,15 +763,15 @@ hilly-course bike speed (sprint, Olympic) and within-leg run fatigue (70.3).}
 \end{table}
 
 \paragraph{Correcting the bike: a course-gradient speed curve.} The bike
-residuals are not random. Retrieving each bike leg's GPS climbing from the raw
+residuals are not random. Retrieving each bike leg's climbing from the raw
 export shows that the two courses the model gets badly wrong climb $15.5$ and
 $15.2$ m/km, while the one it gets right climbs $9.1$. The flat time-trial
 assumption behind ``35 km/h at FTP'' is the single faulty parameter.
 
 Replacing it costs one multiplier: the reference speed becomes
 $v_{\text{FTP}}(1 - c\,\gamma)$ with $\gamma$ the metres of climbing per km.
-Fitting $c$ jointly with $k_E$ on the three races gives $c = 0.008$,
-$k_E = 160$; the energy constant rises because it is no longer silently
+Fitting $c$ jointly with $k_E$ on the three races gives $c = 0.014$,
+$k_E = 190$; the energy constant rises because it is no longer silently
 absorbing the hills of the course it was calibrated on.
 
 \begin{table}[h]
@@ -780,38 +780,36 @@ absorbing the hills of the course it was calibrated on.
 \toprule
 Bike leg & m/km & flat & gradient & actual\\
 \midrule
-Spetsathlon (25 km) & 15.2 & 44.4 \;($-6.5$) & \textbf{50.5 \;($-0.4$)} & 50.9\\
-Epidavros (40 km) & 15.5 & 83.7 \;($-7.8$) & \textbf{90.7 \;($-0.8$)} & 91.5\\
-Costa Navarino (90 km) & 9.1 & \textbf{181.1 \;($+0.8$)} & 185.7 \;($+5.4$) & 180.3\\
+Spetsathlon (24.4 km) & 15.2 & 43.3 \;($-7.6$) & \textbf{55.0 \;($+4.1$)} & 50.9\\
+Epidavros (38.7 km) & 15.5 & 78.9 \;($-12.6$) & \textbf{87.7 \;($-3.8$)} & 91.5\\
+Costa Navarino (88.5 km) & 9.1 & 177.5 \;($-2.8$) & \textbf{180.0 \;($-0.3$)} & 180.3\\
 \midrule
-\multicolumn{2}{l}{total absolute error} & 15.1 min & \textbf{6.6 min} & \\
+\multicolumn{2}{l}{total absolute error} & 23.0 min & \textbf{8.2 min} & \\
+\multicolumn{2}{l}{errors all of one sign} & yes & \textbf{no} & \\
 \bottomrule
 \end{tabular}
-\caption{Flat versus gradient-aware bike speed, at official race distances.
-The correction nearly eliminates the error on both hilly courses but
-over-corrects the moderate one.}
+\caption{Flat versus gradient-aware bike speed. The correction cuts the error
+by two thirds and removes its systematic sign.}
 \label{tab:gradient}
 \end{table}
 
-The honest reading is narrower than ``the model got better''. The correction
-does two things at once: it removes almost all of the error on the two hilly
-courses ($-6.5 \to -0.4$ and $-7.8 \to -0.8$), and it degrades the one course
-that was already accurate ($+0.8 \to +5.4$). Total error drops by more than
-half, but a single linear penalty is evidently too aggressive at low gradients,
-where climbing is recovered on the matching descents.
+Halving the error matters less than losing the bias. A model that is slow on
+every course has a missing term; one that errs in both directions by a similar
+amount has residual noise. The residual is nonetheless real: a single linear
+penalty cannot capture that climbing is partly recovered on the descents, which
+is why the sprint is now over-corrected.
 
-Two data choices deserve stating, because both change the answer. Distances are
-the \emph{official} race distances, not the GPS trace: open-water GPS inflates
-the swim badly (2.26 km recorded for a 1.5 km leg) and the bike trace reads
-short on all three courses by 1.7--3.3\%, a consistent under-read rather than
-three short courses. Only the climbing is taken from the trace, where the
-barometric altimeter is reliable. Had the GPS distances been used instead, the
-same fit would have returned $c = 0.014$ --- a factor of two. A coefficient that
-moves that much with a data convention, fitted on three observations, is not a
-measured constant. The correction is therefore shipped disabled ($c = 0$), so
-every other result in this report is unaffected, and is reported as an
-alternative formulation: three races are enough to \emph{locate} a systematic
-error, not to \emph{calibrate} it away.
+Two data conventions deserve stating. Bike and run distances are the GPS trace
+--- what the athlete actually covered --- while the swim uses the nominal race
+distance, because the watch loses satellite lock underwater and recorded
+2.26 km for a 1.5 km leg. Climbing also comes from the trace. Had nominal
+distances been used throughout, the same fit would have returned $c = 0.008$
+instead of $0.014$. A coefficient that moves by a factor of two with a data
+convention, fitted on three observations, is not a measured constant. The
+correction is therefore shipped disabled ($c = 0$), leaving every other result
+in this report unaffected, and is reported as an alternative formulation: three
+races are enough to \emph{locate} a systematic error, not to \emph{calibrate}
+it away.
 
 \section{Cross-Model Sensitivity Analysis}
 \label{sec:sensitivity}

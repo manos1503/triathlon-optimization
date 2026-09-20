@@ -288,7 +288,7 @@ fitness from the pipeline. $^\ast$non-standard course.}
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Diagnosing the one bad assumption}
+\begin{frame}{Diagnosing the one bad assumption --- and fixing it}
 The bike residuals track the terrain: the two courses the model gets wrong climb
 \textbf{15 m/km}, the one it gets right climbs \textbf{9}.
 \begin{center}\small
@@ -296,23 +296,24 @@ The bike residuals track the terrain: the two courses the model gets wrong climb
 \toprule
 Bike leg & m/km & flat & gradient & actual\\
 \midrule
-Spetsathlon (25 km) & 15.2 & 44.4 \,($-6.5$) & \textbf{50.5 \,($-0.4$)} & 50.9\\
-Epidavros (40 km) & 15.5 & 83.7 \,($-7.8$) & \textbf{90.7 \,($-0.8$)} & 91.5\\
-Costa Navarino (90 km) & 9.1 & \textbf{181.1 \,($+0.8$)} & 185.7 \,($+5.4$) & 180.3\\
+Spetsathlon (24.4 km) & 15.2 & 43.3 \,($-7.6$) & \textbf{55.0 \,($+4.1$)} & 50.9\\
+Epidavros (38.7 km) & 15.5 & 78.9 \,($-12.6$) & \textbf{87.7 \,($-3.8$)} & 91.5\\
+Costa Navarino (88.5 km) & 9.1 & 177.5 \,($-2.8$) & \textbf{180.0 \,($-0.3$)} & 180.3\\
 \midrule
-\multicolumn{2}{l}{total error} & 15.1 min & \textbf{6.6 min} & \\
+\multicolumn{2}{l}{total error} & 23.0 min & \textbf{8.2 min} & \\
+\multicolumn{2}{l}{all one sign?} & \textbf{yes} & \textbf{no} & \\
 \bottomrule
 \end{tabular}
 \end{center}
 \vspace{2pt}
 \begin{itemize}
   \item ``35 km/h at FTP'' describes a \emph{flat} course; scale it by
-        $(1-c\gamma)$, fit $c$ with $k_E$ $\Rightarrow c = 0.008$
-  \item fixes both hilly courses almost exactly --- but \textbf{over-corrects}
-        the moderate one: one linear penalty is too blunt at low gradient
-  \item official distances, not GPS (open-water swim reads 2.26 km for 1.5 km;
-        bike reads 2--3\% short). On GPS distances the same fit gives
-        $c = 0.014$ --- \textbf{a factor of two}
+        $(1-c\gamma)$, fit $c$ with $k_E$ $\Rightarrow c = 0.014$
+  \item \textbf{losing the bias matters more than halving the error}: slow
+        everywhere $=$ missing term; errs both ways $=$ residual noise
+  \item distances: GPS on land, \emph{nominal} for the swim (the watch loses
+        lock underwater: 2.26 km recorded for 1.5 km). On nominal throughout
+        the fit gives $c = 0.008$ --- \textbf{a factor of two}
   \item so: shipped \textbf{disabled}. Three races can \emph{locate} a
         systematic error, not \emph{calibrate} it away
 \end{itemize}
