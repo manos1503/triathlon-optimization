@@ -92,7 +92,7 @@ src/pipeline/      Strava → TRIMP → CTL/ATL data pipeline
 src/models/        PuLP implementations of Models 1–3
 src/analysis/      Sensitivity analysis and scenario runs
 src/run_all.py     One-command reproduction of every result
-tests/             57 tests (models, duality theorems, analyses)
+tests/             59 tests (models, duality theorems, analyses)
 results/           Figures, tables and captured solver output
 report/            Final report (15 pp + appendices with code and output)
 presentation/      Slides (~20 min)
@@ -120,7 +120,7 @@ Python ≥3.10. Optimization via PuLP/CBC; data handling via pandas; plots via m
 
 ```bash
 python -m src.run_all    # pipeline -> Models 1-3 -> all analyses and figures
-python -m pytest tests/  # 57 tests
+python -m pytest tests/  # 59 tests
 ```
 
 Without the personal Strava export (`data/raw/activities.csv`, not committed),

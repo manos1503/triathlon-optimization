@@ -168,7 +168,10 @@ Recovery forces National Champs vs.\ home 70.3 --- optimizer picks the 70.3.
   \item MIP value-of-budget is a \textbf{step function} under the concave LP curve
   \item above 3000 EUR the \emph{vacation-days} budget binds instead ---
         the scarce resource switches
-  \item LP duals: 0.094 value/EUR, $\approx$0 per day off
+  \item \textbf{clique cuts} (Bron--Kerbosch on the conflict graph): 4 valid
+        inequalities $\sum_{i\in C} x_i \le 1$ tighten the relaxation
+        $600.5 \to 591.0$, closing a third of the gap
+        (\textbf{5.04\% $\to$ 3.38\%}) without touching the integer optimum
 \end{itemize}
 \end{columns}
 \end{frame}
@@ -268,8 +271,8 @@ $\Rightarrow$ \emph{build endurance, not peak power.}
 Race & CTL & mdl & act & mdl & act & mdl & act\\
 \midrule
 Spetsathlon '26 (sprint$^\ast$) & 64.9 & 12.9 & 13.2 & 43.3 & 50.9 & 18.7 & \textbf{17.7}\\
-Epidavros '25 (Olympic) & 55.6 & 25.8 & 25.8 & 78.9 & 91.5 & 36.7 & 42.0\\
-70.3 Costa Navarino '25 (fueled) & 71.4 & 33.3 & 32.9 & \textbf{177.5} & \textbf{180.3} & 85.0 & 115.2\\
+Epidavros '25 (Olympic) & 55.6 & 26.3 & 25.8 & 78.9 & 91.5 & 37.7 & 42.0\\
+70.3 Costa Navarino '25 (fueled) & 71.4 & 33.3 & 32.9 & \textbf{177.5} & \textbf{180.3} & 86.4 & 115.2\\
 \bottomrule
 \end{tabular}
 
@@ -278,7 +281,7 @@ fitness from the pipeline. $^\ast$non-standard course.}
 \end{center}
 \vspace{2pt}
 \begin{itemize}
-  \item swim within 0.4 min every time; measured thresholds work
+  \item swim within 0.5 min every time; measured thresholds work
   \item \textbf{binding constraints switch with distance}: speed caps (sprint)
         $\to$ energy (Olympic) $\to$ \emph{infeasible unfed} (70.3)
   \item calibrated fuelling $r \approx 21$ kJ/min $=$ \textbf{75 g carbs/h ---
@@ -405,7 +408,7 @@ Iter. & Macrocycle & Weeks & Selected A-race & Outcome\\
   \item Duals price the athlete's true bottlenecks:
         \emph{recovery capacity} (training), \emph{money} (calendar),
         \emph{endurance --- not watts} (race day)
-  \item Fully reproducible: \texttt{python -m src.run\_all}, 44 tests\\
+  \item Fully reproducible: \texttt{python -m src.run\_all}, 59 tests\\
         \footnotesize\url{https://github.com/manos1503/triathlon-optimization}
 \end{itemize}
 \vspace{8pt}

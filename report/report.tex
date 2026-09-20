@@ -639,36 +639,39 @@ so the prediction and the result are compared leg by leg rather than in total
 \toprule
 Leg & Model (optimal prep) & Actual (Epidavros) & Assessment\\
 \midrule
-Swim & 26.1 min & 25.8 min & within 0.3 min --- threshold pace validated\\
-Bike & 71.0 min (33.8 km/h) & 91.5 min (26.2 km/h) & flat-course assumption fails on hills\\
-Run & 39.8 min & 42.0 min & within 5\%, despite fatigue deficit\\
+Swim & 26.3 min & 25.8 min & within 0.5 min --- threshold pace validated\\
+Bike & 78.9 min (29.4 km/h) & 91.5 min (25.4 km/h) & flat-course assumption fails on hills\\
+Run & 37.7 min & 42.0 min & $-10\%$ --- optimistic under a fatigue deficit\\
 Transitions & 3.5 min & 4.2 min & reasonable\\
 \midrule
-Total & 140.4 min & 163.4 min & \\
+Total & 146.4 min & 163.4 min & \\
 \bottomrule
 \end{tabular}
-\caption{Model 3 prediction vs.\ the author's actual race, 6 Sep 2025.}
+\caption{Model 3 (flat baseline, $k_E = 142$) vs.\ the actual race, 7 Sep 2025.}
 \label{tab:race}
 \end{table}
 
 The comparison separates parameter quality cleanly. Where zone speeds derive
 from \emph{personally measured} thresholds (swim pace, run pace), predictions
-land within minutes. The 20-minute bike gap is a course-model mismatch: the
+land within minutes. The 12.6-minute bike gap is a course-model mismatch: the
 $35$ km/h-at-FTP assumption describes a flat time-trial course, while the
 Epidavros bike leg is hilly --- a course-specific speed curve (or the elevation
 data already used in Model~2) would close most of it. The race also
 \emph{calibrates} the energy link: at the actual race-day CTL of 55.6 the a
-priori budget $E = 115 \cdot \text{CTL}$ is infeasible --- yet the athlete
-finished --- and reproducing the actual 163.4 min requires
-$k_E \approx 142$. A single real race thus pins the model's least-measurable
-constant, and all energy-related duals scale by the same factor
-($\approx 142/115$) under the recalibration.
+priori budget $E = 115 \cdot \text{CTL}$ is \emph{infeasible} --- the model says
+the race cannot be finished --- yet the athlete finished it. Raising $k_E$ to
+$\approx 142$ is the smallest change that restores feasibility, which is how
+that constant is calibrated here; it does not reproduce the finishing time
+(the model still predicts 146.4 min against 163.4 actual, the remainder being
+the hills and the within-leg fatigue the formulation omits). A single real race
+thus bounds the model's least-measurable constant from below, and all
+energy-related duals scale by $\approx 142/115$ under the recalibration.
 
 A second, more recent race probes a different problem size: the
 \emph{Spetsathlon 2026} (17 May 2026; non-standard sprint --- 750\,m swim,
 25\,km hilly bike, 4.75\,km run), finished in 1:24:28 at a reconstructed
 race-day state of $\text{CTL}=64.9$, $\text{TSB}\approx 0$. Model~3 re-solved on
-this course geometry predicts 79.7 min vs.\ 84.5 actual
+this course geometry predicts 78.5 min vs.\ 84.5 actual
 (Table~\ref{tab:race2}).
 
 \begin{table}[h]
@@ -678,8 +681,8 @@ this course geometry predicts 79.7 min vs.\ 84.5 actual
 Leg & Model & Actual (Spetsathlon) & Assessment\\
 \midrule
 Swim & 12.9 min & 13.2 min & within 0.3 min, again\\
-Bike & 44.4 min (33.8 km/h) & 50.9 min (29.5 km/h) & flat-course assumption, again\\
-Run & 18.9 min & 17.7 min & athlete \emph{beat} the model's Z5 speed cap\\
+Bike & 43.3 min (33.8 km/h) & 50.9 min (28.8 km/h) & flat-course assumption, again\\
+Run & 18.7 min & 17.7 min & athlete \emph{beat} the model's Z5 speed cap\\
 \bottomrule
 \end{tabular}
 \caption{Model 3 vs.\ the Spetsathlon 2026 sprint (transitions excluded).}
@@ -715,7 +718,7 @@ so the extension costs nothing in tractability. Calibrating $r$ against the
 actual race gives $r \approx 21$ kJ/min --- which is $\approx 75$\,g of
 carbohydrate per hour, \emph{precisely the standard sports-nutrition
 guideline}. With it, the model reproduces the swim within 0.4 min (33.3 vs.\
-32.9) and the bike within \textbf{one minute} (181.1 vs.\ 180.3).
+32.9) and the bike within three minutes (177.5 vs.\ 180.3).
 
 Fueling can further be made a \emph{decision}: per-leg intake $F_\ell \ge 0$
 (kJ) bounded by gut absorption, $F_\ell \le \bar r_\ell \sum_z t_{\ell z}$
@@ -751,9 +754,9 @@ reconstructed fitness.
 & & \multicolumn{2}{c}{Swim} & \multicolumn{2}{c}{Bike} & \multicolumn{2}{c}{Run}\\
 Race & CTL & model & actual & model & actual & model & actual\\
 \midrule
-Spetsathlon 2026 (sprint$^\ast$) & 64.9 & 12.9 & 13.2 & 44.4 & 50.9 & 18.9 & 17.7\\
-Epidavros 2025 (Olympic) & 55.6 & 27.6 & 25.8 & 83.7 & 91.5 & 43.1 & 42.0\\
-IM 70.3 Costa Navarino 2025 (fueled) & 71.4 & 33.3 & 32.9 & 181.1 & 180.3 & 86.3 & 115.2\\
+Spetsathlon 2026 (sprint$^\ast$) & 64.9 & 12.9 & 13.2 & 43.3 & 50.9 & 18.7 & 17.7\\
+Epidavros 2025 (Olympic) & 55.6 & 26.3 & 25.8 & 78.9 & 91.5 & 37.7 & 42.0\\
+IM 70.3 Costa Navarino 2025 (fueled) & 71.4 & 33.3 & 32.9 & 177.5 & 180.3 & 86.4 & 115.2\\
 \bottomrule
 \end{tabular}
 \caption{Model 3 vs.\ three real races (leg times, min) at $k_E = 142$ and
@@ -1170,7 +1173,7 @@ All three models are implemented in Python with PuLP as the modelling layer and
 CBC as the solver, matching the toolchain used in the course. The listings below
 are extracted directly from the repository files, so they are the code that
 produced every number in this report. The full sources, the data pipeline and
-the 57-test suite are in the repository.
+the 59-test suite are in the repository.
 
 \subsection{Model 1 --- training-load LP (\texttt{src/models/model1\_training.py})}
 

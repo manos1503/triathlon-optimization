@@ -83,13 +83,17 @@ if __name__ == "__main__":
         grad = predict(profile, ctl, dist, gpk, fuel, gradient=True)
         rows.append({
             "race": name, "date": date, "ctl": ctl, "bike_m_per_km": gpk,
-            "swim_model": round(grad["swim"], 1) if grad is not None else None,
+            # baseline (flat) model -- what the main validation table reports
+            "swim_flat": round(flat["swim"], 1) if flat is not None else None,
             "swim_actual": a_sw,
             "bike_flat": round(flat["bike"], 1) if flat is not None else None,
-            "bike_gradient": round(grad["bike"], 1) if grad is not None else None,
             "bike_actual": a_bk,
-            "run_model": round(grad["run"], 1) if grad is not None else None,
+            "run_flat": round(flat["run"], 1) if flat is not None else None,
             "run_actual": a_rn,
+            # gradient variant -- only the bike leg is affected in substance
+            "swim_gradient": round(grad["swim"], 1) if grad is not None else None,
+            "bike_gradient": round(grad["bike"], 1) if grad is not None else None,
+            "run_gradient": round(grad["run"], 1) if grad is not None else None,
         })
     df = pd.DataFrame(rows)
     df.to_csv(TABLES / "model3_race_validation.csv", index=False)
