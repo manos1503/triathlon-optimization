@@ -577,8 +577,18 @@ knapsack rows are added.
 For legs $\Lambda$ and intensity zones $Z1$--$Z5$, the variables $t_{\ell z}\ge 0$
 are minutes in zone $z$ during leg $\ell$. Within a zone, speed and metabolic rate
 are constants, linearizing the nonlinear speed--energy curve: bike speed scales
-with the cube root of power (aerodynamic drag), $v_z = v_{\text{FTP}}
-(P_z/\text{FTP})^{1/3}$ with $\text{FTP}=260$\,W; swim/run speeds are fractions of
+with the cube root of power (aerodynamic drag), $v_z = \phi(\gamma)\,
+v_{\text{FTP}}(P_z/\text{FTP})^{1/3}$ with $\text{FTP}=260$\,W. The factor
+$\phi(\gamma) \le 1$ accounts for the course's climbing $\gamma$ (metres per
+km): at equal power a rider covers less ground on a hilly course, because the
+time lost climbing exceeds the time regained descending. It is obtained from
+the cycling power balance $P = v\,(k v^2 + F_{\text{roll}} + m g s)$ by solving
+for the up- and downhill speeds at constant power and taking their harmonic
+mean over equal distances, with $k$ back-solved from the athlete's own flat
+reference speed --- so nothing in $\phi$ is fitted to race results. It is convex
+in $\gamma$ ($\phi = 0.97$ at 9 m/km, $0.91$ at 15), so a linear penalty would
+be only a local approximation. The baseline instance is a flat reference
+course, $\gamma = 0$, $\phi = 1$. Swim/run speeds are fractions of
 threshold pace; energy cost per km rises with intensity (economy factors
 0.95--1.20). The program minimizes total time subject to covering each leg's
 distance, an overall energy budget $E^{\text{tot}} = k_E\cdot\text{CTL}_T$ linked
@@ -754,9 +764,9 @@ reconstructed fitness.
 & & \multicolumn{2}{c}{Swim} & \multicolumn{2}{c}{Bike} & \multicolumn{2}{c}{Run}\\
 Race & CTL & model & actual & model & actual & model & actual\\
 \midrule
-Spetsathlon 2026 (sprint$^\ast$) & 64.9 & 12.9 & 13.2 & 43.3 & 50.9 & 18.7 & 17.7\\
-Epidavros 2025 (Olympic) & 55.6 & 26.3 & 25.8 & 78.9 & 91.5 & 37.7 & 42.0\\
-IM 70.3 Costa Navarino 2025 (fueled) & 71.4 & 33.3 & 32.9 & 177.5 & 180.3 & 86.4 & 115.2\\
+Spetsathlon 2026 (sprint$^\ast$) & 64.9 & 12.9 & 13.2 & 47.3 & 50.9 & 18.7 & 17.7\\
+Epidavros 2025 (Olympic) & 55.6 & 27.2 & 25.8 & 88.8 & 91.5 & 38.9 & 42.0\\
+IM 70.3 Costa Navarino 2025 (fueled) & 71.4 & 33.3 & 32.9 & 184.6 & 180.3 & 86.4 & 115.2\\
 \bottomrule
 \end{tabular}
 \caption{Model 3 vs.\ three real races (leg times, min) at $k_E = 142$ and
@@ -765,54 +775,47 @@ hilly-course bike speed (sprint, Olympic) and within-leg run fatigue (70.3).}
 \label{tab:threeraces}
 \end{table}
 
-\paragraph{Correcting the bike: a course-gradient speed curve.} The bike
-residuals are not random. Retrieving each bike leg's climbing from the raw
-export shows that the two courses the model gets badly wrong climb $15.5$ and
-$15.2$ m/km, while the one it gets right climbs $9.1$. The flat time-trial
-assumption behind ``35 km/h at FTP'' is the single faulty parameter.
-
-Replacing it costs one multiplier: the reference speed becomes
-$v_{\text{FTP}}(1 - c\,\gamma)$ with $\gamma$ the metres of climbing per km.
-Fitting $c$ jointly with $k_E$ on the three races gives $c = 0.014$,
-$k_E = 190$; the energy constant rises because it is no longer silently
-absorbing the hills of the course it was calibrated on.
+\paragraph{What the bike residual is made of.} The bike is the leg the model
+predicts least well, and its residual is informative rather than random. Had
+the course gradient been ignored --- a naive flat-course speed curve --- the
+total bike error across the three races would be 23.0 min and the model would
+be too fast on \emph{every} course, the signature of a missing term. With
+$\phi(\gamma)$ in the formulation the error falls to 10.6 min and changes sign
+between races (Table~\ref{tab:gradient}): no remaining systematic bias.
 
 \begin{table}[h]
 \centering\small
-\begin{tabular}{lrrrr}
+\begin{tabular}{lrrrrr}
 \toprule
-Bike leg & m/km & flat & gradient & actual\\
+Bike leg & m/km & no gradient & $\phi(\gamma)$ & empirical fit & actual\\
 \midrule
-Spetsathlon (24.4 km) & 15.2 & 43.3 \;($-7.6$) & \textbf{55.0 \;($+4.1$)} & 50.9\\
-Epidavros (38.7 km) & 15.5 & 78.9 \;($-12.6$) & \textbf{87.7 \;($-3.8$)} & 91.5\\
-Costa Navarino (88.5 km) & 9.1 & 177.5 \;($-2.8$) & \textbf{180.0 \;($-0.3$)} & 180.3\\
+Spetsathlon (24.4 km) & 15.2 & 43.3 & \textbf{47.3} & 55.0 & 50.9\\
+Epidavros (38.7 km) & 15.5 & 78.9 & \textbf{88.8} & 87.7 & 91.5\\
+Costa Navarino (88.5 km) & 9.1 & 177.5 & \textbf{184.6} & 180.0 & 180.3\\
 \midrule
-\multicolumn{2}{l}{total absolute error} & 23.0 min & \textbf{8.2 min} & \\
-\multicolumn{2}{l}{errors all of one sign} & yes & \textbf{no} & \\
+\multicolumn{2}{l}{total absolute error} & 23.0 min & \textbf{10.6 min} & 8.2 min & \\
+\multicolumn{2}{l}{parameters fitted to these races} & 0 & \textbf{0} & 2 & \\
 \bottomrule
 \end{tabular}
-\caption{Flat versus gradient-aware bike speed. The correction cuts the error
-by two thirds and removes its systematic sign.}
+\caption{The bike leg under three speed curves. The shipped model uses
+$\phi(\gamma)$, which fits nothing to these races. The empirical column is a
+two-parameter fit \emph{on} them, and is therefore an upper bound on what such
+a correction could achieve rather than a competing result.}
 \label{tab:gradient}
 \end{table}
 
-Halving the error matters less than losing the bias. A model that is slow on
-every course has a missing term; one that errs in both directions by a similar
-amount has residual noise. The residual is nonetheless real: a single linear
-penalty cannot capture that climbing is partly recovered on the descents, which
-is why the sprint is now over-corrected.
-
-Two data conventions deserve stating. Bike and run distances are the GPS trace
---- what the athlete actually covered --- while the swim uses the nominal race
-distance, because the watch loses satellite lock underwater and recorded
-2.26 km for a 1.5 km leg. Climbing also comes from the trace. Had nominal
-distances been used throughout, the same fit would have returned $c = 0.008$
-instead of $0.014$. A coefficient that moves by a factor of two with a data
-convention, fitted on three observations, is not a measured constant. The
-correction is therefore shipped disabled ($c = 0$), leaving every other result
-in this report unaffected, and is reported as an alternative formulation: three
-races are enough to \emph{locate} a systematic error, not to \emph{calibrate}
-it away.
+That last column is worth including because it bounds the error that remains.
+A linear penalty $c\gamma$, with $c$ and $k_E$ both re-fitted on these three
+races, reaches 8.2 min --- only 2.4 min better than the derived $\phi$, while
+spending two degrees of freedom on three observations, and with $c$ moving from
+$0.014$ to $0.008$ if distances are taken as nominal rather than measured.
+Essentially all of the recoverable error is therefore attributable to gradient
+alone, and what is left is not something three races can identify. The sign of
+the residual is itself consistent with the model's own simplification: $\phi$
+assumes the rider holds threshold power on the descents, which no one does on
+technical courses, so the true penalty on the two hilly races should be a
+little larger than modelled --- and the model is indeed still 3.6 and 2.7 min
+fast on exactly those two.
 
 \section{Cross-Model Sensitivity Analysis}
 \label{sec:sensitivity}

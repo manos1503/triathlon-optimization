@@ -10,11 +10,13 @@ trace is unusable (2.26 km recorded for a 1.5 km leg); on land the trace is
 reliable and is what the athlete actually covered. Climbing likewise comes from
 the trace.
 
-The convention matters, and is worth stating: refitting the gradient
-coefficient on nominal rather than traced distances moves it from c = 0.014 to
-c = 0.008. A factor of two, from a data convention, on three observations --
-itself a reason to report the correction as an alternative formulation rather
-than a calibrated constant.
+The bike speed curve accounts for each course's climbing through
+``model3_pacing.grade_factor``, which is derived from the cycling power balance
+and fits NOTHING to these races -- so the comparison below is a genuine
+out-of-sample test, not a curve fit. For contrast the script also reports a
+two-parameter empirical fit (a linear penalty c together with a re-fitted k_E),
+which is fitted ON these three races and is therefore an upper bound on how
+well any such correction could look.
 
 Note on Spetsathlon: its bike leg is 25 km, not the 20 km of a standard sprint,
 which is why it is marked sprint* throughout.
@@ -23,15 +25,15 @@ which is why it is marked sprint* throughout.
     Costa Navarino 70.3 26 Oct 2025  CTL 71.4   bike  9.1 m/km
     Spetsathlon 2026    17 May 2026  CTL 64.9   bike 15.2 m/km
 
-Two model variants are compared:
+Three variants are compared:
 
-    flat      the baseline speed curve (35 km/h at FTP on a flat course)
-    gradient  reference speed scaled by (1 - c * m/km), c = 0.014
+    flat      pretending every course is flat (the model before the fix)
+    physics   grade_factor from the power balance -- nothing fitted  [DEFAULT]
+    fitted    linear penalty c = 0.014 with k_E = 190, fitted on these races
 
-c and k_E were fitted jointly on the three races. The gradient variant cuts the
-total bike error by two thirds and, more importantly, removes its systematic
-sign: the flat model is slow on every course, the gradient model errs in both
-directions.
+Total bike error: 23.0 min flat, 10.6 min physics, 8.2 min fitted. The physics
+model recovers most of the available improvement with zero free parameters, and
+its errors fall on both sides of zero; the flat model is slow on every course.
 
 Usage:
     python -m src.analysis.race_validation
@@ -47,9 +49,9 @@ from src.models.model3_pacing import build_model, extract_solution, solve
 
 from .common import TABLES, load_inputs
 
-K_E_FLAT = 142       # calibrated on Epidavros with the flat speed curve
-K_E_GRADIENT = 190   # re-calibrated jointly with the gradient penalty
-C_GRADIENT = 0.014   # speed loss per metre of climbing per km
+K_E = 142            # feasibility-calibrated on Epidavros; unchanged throughout
+K_E_FITTED = 190     # only for the empirical-fit comparison column
+C_FITTED = 0.014     # only for the empirical-fit comparison column
 
 RACES = [
     # name, date, CTL, ATL, distances (bike/run = GPS, swim = nominal), m/km, fuel, actual
@@ -63,13 +65,19 @@ RACES = [
 
 
 def predict(profile: dict, ctl: float, distances: dict, gpk: float,
-            fuelling: float, gradient: bool):
+            fuelling: float, mode: str):
+    """mode: 'flat' | 'physics' | 'fitted'."""
     p = copy.deepcopy(profile)
     p["model3"]["distances_km"] = distances
-    p["model3"]["energy_budget_kj_per_ctl"] = K_E_GRADIENT if gradient else K_E_FLAT
-    p["model3"]["bike_gradient_penalty"] = C_GRADIENT if gradient else 0.0
+    p["model3"]["energy_budget_kj_per_ctl"] = K_E_FITTED if mode == "fitted" else K_E
+    if mode == "fitted":
+        # emulate the old linear penalty by scaling the reference speed directly
+        p["model3"]["bike_speed_at_ftp_kmh"] *= max(0.25, 1.0 - C_FITTED * gpk)
+        g = 0.0
+    else:
+        g = gpk if mode == "physics" else 0.0
     prob, v = build_model(p, ctl_race_day=ctl, fueling_kj_min=fuelling,
-                          gradient_m_per_km=gpk if gradient else 0.0)
+                          gradient_m_per_km=g)
     if solve(prob) != "Optimal":
         return None
     return extract_solution(prob, v)["leg_times"]
@@ -79,21 +87,21 @@ if __name__ == "__main__":
     profile, _, _ = load_inputs()
     rows = []
     for name, date, ctl, atl, dist, gpk, fuel, (a_sw, a_bk, a_rn) in RACES:
-        flat = predict(profile, ctl, dist, gpk, fuel, gradient=False)
-        grad = predict(profile, ctl, dist, gpk, fuel, gradient=True)
+        flat = predict(profile, ctl, dist, gpk, fuel, "flat")
+        phys = predict(profile, ctl, dist, gpk, fuel, "physics")
+        fit = predict(profile, ctl, dist, gpk, fuel, "fitted")
         rows.append({
             "race": name, "date": date, "ctl": ctl, "bike_m_per_km": gpk,
-            # baseline (flat) model -- what the main validation table reports
-            "swim_flat": round(flat["swim"], 1) if flat is not None else None,
+            # the shipped model: gradient-aware, nothing fitted to these races
+            "swim_model": round(phys["swim"], 1) if phys is not None else None,
             "swim_actual": a_sw,
-            "bike_flat": round(flat["bike"], 1) if flat is not None else None,
+            "bike_model": round(phys["bike"], 1) if phys is not None else None,
             "bike_actual": a_bk,
-            "run_flat": round(flat["run"], 1) if flat is not None else None,
+            "run_model": round(phys["run"], 1) if phys is not None else None,
             "run_actual": a_rn,
-            # gradient variant -- only the bike leg is affected in substance
-            "swim_gradient": round(grad["swim"], 1) if grad is not None else None,
-            "bike_gradient": round(grad["bike"], 1) if grad is not None else None,
-            "run_gradient": round(grad["run"], 1) if grad is not None else None,
+            # comparators
+            "bike_flat": round(flat["bike"], 1) if flat is not None else None,
+            "bike_fitted": round(fit["bike"], 1) if fit is not None else None,
         })
     df = pd.DataFrame(rows)
     df.to_csv(TABLES / "model3_race_validation.csv", index=False)
@@ -104,9 +112,9 @@ if __name__ == "__main__":
         d = df.dropna(subset=[col])
         return (d[col] - d["bike_actual"]).abs().sum()
 
-    print(f"\n[validation] bike error, flat model:     {total_err('bike_flat'):5.1f} min")
-    print(f"[validation] bike error, gradient model: {total_err('bike_gradient'):5.1f} min")
-    signs = [(r["bike_flat"] or 0) - r["bike_actual"] for _, r in df.iterrows()]
-    print(f"[validation] flat errors all same sign:  {all(s < 0 for s in signs)}")
-    signs_g = [(r["bike_gradient"] or 0) - r["bike_actual"] for _, r in df.iterrows()]
-    print(f"[validation] gradient errors mixed sign: {not all(s < 0 for s in signs_g)}")
+    for col, label in (("bike_flat", "flat (no gradient)"),
+                       ("bike_model", "physics (shipped, 0 fitted)"),
+                       ("bike_fitted", "empirical fit (2 fitted)")):
+        e = (df[col] - df["bike_actual"])
+        print(f"[validation] bike error {label:28} {e.abs().sum():5.1f} min"
+              f"   all one sign: {bool((e < 0).all())}")

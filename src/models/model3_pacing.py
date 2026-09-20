@@ -36,16 +36,59 @@ def _pace_to_kmh(pace: str, meters: float) -> float:
     return (meters / 1000.0) / ((int(m) * 60 + int(s)) / 3600.0)
 
 
+def _speed_at_power(power: float, k_aero: float, f_roll: float, grade: float,
+                    mass: float, g: float = 9.81) -> float:
+    """Steady-state speed (m/s) from the cycling power balance
+    P = v (k_aero v^2 + f_roll + m g s), solved by bisection."""
+    lo, hi = 0.5, 30.0
+    for _ in range(200):
+        mid = 0.5 * (lo + hi)
+        if mid * (k_aero * mid ** 2 + f_roll + mass * g * grade) < power:
+            lo = mid
+        else:
+            hi = mid
+    return 0.5 * (lo + hi)
+
+
+def grade_factor(profile: dict, gradient_m_per_km: float,
+                 ftp_watts: float | None = None) -> float:
+    """Fraction of flat-course speed retained on a course that climbs
+    ``gradient_m_per_km`` metres per kilometre.
+
+    Derived from physics, NOT fitted to any race. The course is modelled as
+    half its distance uphill at grade 2*G/1000 and half downhill at the same
+    grade, ridden at constant power; the course speed is the harmonic mean of
+    the two (equal distances). The aerodynamic constant is back-solved from the
+    athlete's own flat reference speed at FTP, so the only inputs are the
+    profile's FTP, flat speed, system mass and rolling-resistance coefficient.
+
+    Climbing costs more time than descending returns, so the factor is < 1 for
+    any G > 0, and it is convex in G -- a linear penalty is only a local
+    approximation.
+    """
+    m3 = profile["model3"]
+    if gradient_m_per_km <= 0:
+        return 1.0
+    ftp = ftp_watts if ftp_watts is not None else profile["thresholds"]["bike_ftp_watts"]
+    v_flat = m3["bike_speed_at_ftp_kmh"] / 3.6
+    mass = m3.get("system_mass_kg", 78.0)
+    f_roll = m3.get("rolling_resistance_coeff", 0.004) * mass * 9.81
+    k_aero = (ftp / v_flat - f_roll) / v_flat ** 2
+    s = gradient_m_per_km / 500.0          # all climbing in half the distance
+    v_up = _speed_at_power(ftp, k_aero, f_roll, s, mass)
+    v_down = _speed_at_power(ftp, k_aero, f_roll, -s, mass)
+    return (2.0 / (1.0 / v_up + 1.0 / v_down)) / v_flat
+
+
 def zone_parameters(profile: dict, ftp_watts: float | None = None,
                     gradient_m_per_km: float = 0.0) -> pd.DataFrame:
     """Speed (km/min) and metabolic energy rate (kJ/min) per (leg, zone).
 
-    ``gradient_m_per_km``: average climbing of the bike course. The reference
-    speed at FTP describes a FLAT time-trial course; on a hilly course the same
-    power yields less speed, so the reference is scaled by (1 - c * gpk) with
-    c = ``bike_gradient_penalty`` from the profile. c = 0 (default) reproduces
-    the original flat-course model exactly. Calibrated jointly with k_E on the
-    athlete's three real races: c = 0.014 per m/km.
+    ``gradient_m_per_km``: the bike course's climbing per km. The reference
+    speed at FTP describes a flat course; on a hilly course the same power
+    yields less speed, so it is scaled by ``grade_factor`` -- derived from the
+    cycling power balance, with nothing fitted to race results. G = 0 (the
+    default, a flat reference course) leaves the speeds unchanged.
     """
     m3 = profile["model3"]
     thr = profile["thresholds"]
@@ -53,9 +96,8 @@ def zone_parameters(profile: dict, ftp_watts: float | None = None,
 
     v_swim_thr = _pace_to_kmh(m3["swim_threshold_pace_per_100m"], 100) / 60.0   # km/min
     v_run_thr = _pace_to_kmh(thr["run_threshold_pace"], 1000) / 60.0
-    c_grad = m3.get("bike_gradient_penalty", 0.0)
-    grade_factor = max(0.25, 1.0 - c_grad * gradient_m_per_km)
-    v_bike_ftp_ref = m3["bike_speed_at_ftp_kmh"] * grade_factor / 60.0
+    gf = grade_factor(profile, gradient_m_per_km, ftp)
+    v_bike_ftp_ref = m3["bike_speed_at_ftp_kmh"] * gf / 60.0
     ftp_ref = thr["bike_ftp_watts"]
 
     rows = []

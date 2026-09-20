@@ -232,7 +232,9 @@ structure and forces Branch \& Bound in the full model.
 \vspace{4pt}
 
 \textbf{Linearization:} within a zone, speed and energy rate are constants ---
-bike speed $\propto$ (power)$^{1/3}$ (aero drag), economy degrades with intensity
+bike speed $\propto \phi(\gamma)\cdot$(power)$^{1/3}$, economy degrades with intensity.
+$\phi(\gamma)$ is the course-gradient factor from the cycling power balance
+(harmonic mean of up/down speeds at constant power) --- \textbf{derived, not fitted}
 \vspace{4pt}
 \[
 \min \sum_{\ell,z} t_{\ell z} + T_1 + T_2
@@ -270,9 +272,9 @@ $\Rightarrow$ \emph{build endurance, not peak power.}
 & & \multicolumn{2}{c}{Swim} & \multicolumn{2}{c}{Bike} & \multicolumn{2}{c}{Run}\\
 Race & CTL & mdl & act & mdl & act & mdl & act\\
 \midrule
-Spetsathlon '26 (sprint$^\ast$) & 64.9 & 12.9 & 13.2 & 43.3 & 50.9 & 18.7 & \textbf{17.7}\\
-Epidavros '25 (Olympic) & 55.6 & 26.3 & 25.8 & 78.9 & 91.5 & 37.7 & 42.0\\
-70.3 Costa Navarino '25 (fueled) & 71.4 & 33.3 & 32.9 & \textbf{177.5} & \textbf{180.3} & 86.4 & 115.2\\
+Spetsathlon '26 (sprint$^\ast$) & 64.9 & 12.9 & 13.2 & 47.3 & 50.9 & 18.7 & \textbf{17.7}\\
+Epidavros '25 (Olympic) & 55.6 & 27.2 & 25.8 & 88.8 & 91.5 & 38.9 & 42.0\\
+70.3 Costa Navarino '25 (fueled) & 71.4 & 33.3 & 32.9 & \textbf{184.6} & \textbf{180.3} & 86.4 & 115.2\\
 \bottomrule
 \end{tabular}
 
@@ -291,34 +293,32 @@ fitness from the pipeline. $^\ast$non-standard course.}
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Diagnosing the one bad assumption --- and fixing it}
-The bike residuals track the terrain: the two courses the model gets wrong climb
-\textbf{15 m/km}, the one it gets right climbs \textbf{9}.
+\begin{frame}{What the bike residual is made of}
+The bike is the least accurate leg. Is the residual noise, or a missing term?
 \begin{center}\small
-\begin{tabular}{lrrrr}
+\begin{tabular}{lrrrrr}
 \toprule
-Bike leg & m/km & flat & gradient & actual\\
+Bike leg & m/km & no gradient & $\phi(\gamma)$ & empirical fit & actual\\
 \midrule
-Spetsathlon (24.4 km) & 15.2 & 43.3 \,($-7.6$) & \textbf{55.0 \,($+4.1$)} & 50.9\\
-Epidavros (38.7 km) & 15.5 & 78.9 \,($-12.6$) & \textbf{87.7 \,($-3.8$)} & 91.5\\
-Costa Navarino (88.5 km) & 9.1 & 177.5 \,($-2.8$) & \textbf{180.0 \,($-0.3$)} & 180.3\\
+Spetsathlon (24.4 km) & 15.2 & 43.3 & \textbf{47.3} & 55.0 & 50.9\\
+Epidavros (38.7 km) & 15.5 & 78.9 & \textbf{88.8} & 87.7 & 91.5\\
+Costa Navarino (88.5 km) & 9.1 & 177.5 & \textbf{184.6} & 180.0 & 180.3\\
 \midrule
-\multicolumn{2}{l}{total error} & 23.0 min & \textbf{8.2 min} & \\
-\multicolumn{2}{l}{all one sign?} & \textbf{yes} & \textbf{no} & \\
+\multicolumn{2}{l}{total error} & 23.0 min & \textbf{10.6 min} & 8.2 min & \\
+\multicolumn{2}{l}{fitted to these races} & 0 & \textbf{0} & 2 & \\
 \bottomrule
 \end{tabular}
 \end{center}
 \vspace{2pt}
 \begin{itemize}
-  \item ``35 km/h at FTP'' describes a \emph{flat} course; scale it by
-        $(1-c\gamma)$, fit $c$ with $k_E$ $\Rightarrow c = 0.014$
-  \item \textbf{losing the bias matters more than halving the error}: slow
-        everywhere $=$ missing term; errs both ways $=$ residual noise
-  \item distances: GPS on land, \emph{nominal} for the swim (the watch loses
-        lock underwater: 2.26 km recorded for 1.5 km). On nominal throughout
-        the fit gives $c = 0.008$ --- \textbf{a factor of two}
-  \item so: shipped \textbf{disabled}. Three races can \emph{locate} a
-        systematic error, not \emph{calibrate} it away
+  \item ignore gradient $\Rightarrow$ 23 min error and \textbf{too fast on every
+        course} --- a missing term, not noise
+  \item $\phi(\gamma)$ from physics: 10.6 min, errors on \textbf{both} sides
+  \item a 2-parameter fit \emph{on} these races buys only 2.4 min more ---
+        so gradient explains essentially all of the recoverable error
+  \item residual sign is consistent: $\phi$ assumes threshold power on the
+        descents, which nobody does $\Rightarrow$ still slightly fast on the
+        two hilly courses
 \end{itemize}
 \end{frame}
 
