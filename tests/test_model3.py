@@ -117,30 +117,35 @@ def test_fueling_extension():
     assert pulp.value(prob_a.objective) == pytest.approx(pulp.value(prob_b.objective))
 
 
-def test_gradient_penalty_slows_the_bike():
+def test_gradient_slows_the_bike():
     """A hilly course must be slower than a flat one, all else equal."""
     from src.models.model3_pacing import zone_parameters
-    import copy
-    p = copy.deepcopy(PROFILE)
-    p["model3"]["bike_gradient_penalty"] = 0.014
-    flat = zone_parameters(p, gradient_m_per_km=0.0)
-    hilly = zone_parameters(p, gradient_m_per_km=15.0)
+    flat = zone_parameters(PROFILE, gradient_m_per_km=0.0)
+    hilly = zone_parameters(PROFILE, gradient_m_per_km=15.0)
     fb = flat[flat.leg == "bike"]["speed_km_min"].to_numpy()
     hb = hilly[hilly.leg == "bike"]["speed_km_min"].to_numpy()
     assert (hb < fb).all()
-    # swim and run are untouched by a bike gradient
+    # a bike gradient must not touch the swim or the run
     for leg in ("swim", "run"):
         a = flat[flat.leg == leg]["speed_km_min"].to_numpy()
         b = hilly[hilly.leg == leg]["speed_km_min"].to_numpy()
         assert (a == b).all()
 
 
-def test_gradient_default_is_inert():
-    """With the shipped default (c = 0) the model is bit-identical."""
-    import copy, pulp
-    p = copy.deepcopy(PROFILE)
-    p["model3"]["bike_gradient_penalty"] = 0.0
-    a, _ = build_model(p, ctl_race_day=81.6, gradient_m_per_km=0.0)
-    b, _ = build_model(p, ctl_race_day=81.6, gradient_m_per_km=15.0)
-    assert solve(a) == solve(b) == "Optimal"
-    assert pulp.value(a.objective) == pytest.approx(pulp.value(b.objective))
+def test_flat_reference_course_unchanged():
+    """G = 0 is the baseline flat course: the shipped results must not move."""
+    prob, _ = build_model(PROFILE, ctl_race_day=81.6, gradient_m_per_km=0.0)
+    assert solve(prob) == "Optimal"
+    assert pulp.value(prob.objective) == pytest.approx(140.46, abs=0.1)
+
+
+def test_grade_factor_physics():
+    """The factor is derived, not fitted: check its qualitative properties."""
+    from src.models.model3_pacing import grade_factor
+    assert grade_factor(PROFILE, 0.0) == 1.0
+    f5, f15, f20 = (grade_factor(PROFILE, g) for g in (5.0, 15.0, 20.0))
+    assert 1.0 > f5 > f15 > f20 > 0.5          # monotone, never absurd
+    # convex in G: the marginal penalty grows with gradient
+    assert (f5 - f15) / 10.0 < (f15 - f20) / 5.0
+    # sanity against an independent hand calculation at 15 m/km (~8-9% loss)
+    assert 0.90 < f15 < 0.93

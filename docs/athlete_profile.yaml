@@ -97,11 +97,13 @@ model3:
   transitions_min: {t1: 2.0, t2: 1.5}
   swim_threshold_pace_per_100m: "1:40"               # threshold swim speed
   bike_speed_at_ftp_kmh: 35.0                        # solo non-draft speed on a FLAT course
-  # Hilly courses: reference speed scaled by (1 - c * m/km of climbing).
-  # c = 0.014 calibrated jointly with k_E on the three real races
-  # (Epidavros 15.5, Spetsathlon 15.2, Costa Navarino 9.1 m/km).
-  # Default 0.0 keeps the original flat-course model and all baseline results.
-  bike_gradient_penalty: 0.0
+  # Hilly courses: the reference speed is scaled by a factor derived from the
+  # cycling power balance (see model3_pacing.grade_factor) -- nothing is fitted
+  # to race results. These two constants are the only extra inputs.
+  system_mass_kg: 78.0            # rider + bike + kit
+  rolling_resistance_coeff: 0.004 # road tyres on tarmac
+  # The baseline Olympic instance below is a FLAT reference course (G = 0);
+  # each validation race supplies its own measured climbing per km.
   bike_metabolic_efficiency: 0.24                    # mechanical/metabolic ratio
   run_energy_cost_kj_per_km: 293                     # ~1 kcal/kg/km at 70 kg
   swim_energy_cost_kj_per_km: 1170                   # ~4x running cost per km
