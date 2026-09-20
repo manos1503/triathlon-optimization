@@ -36,15 +36,26 @@ def _pace_to_kmh(pace: str, meters: float) -> float:
     return (meters / 1000.0) / ((int(m) * 60 + int(s)) / 3600.0)
 
 
-def zone_parameters(profile: dict, ftp_watts: float | None = None) -> pd.DataFrame:
-    """Speed (km/min) and metabolic energy rate (kJ/min) per (leg, zone)."""
+def zone_parameters(profile: dict, ftp_watts: float | None = None,
+                    gradient_m_per_km: float = 0.0) -> pd.DataFrame:
+    """Speed (km/min) and metabolic energy rate (kJ/min) per (leg, zone).
+
+    ``gradient_m_per_km``: average climbing of the bike course. The reference
+    speed at FTP describes a FLAT time-trial course; on a hilly course the same
+    power yields less speed, so the reference is scaled by (1 - c * gpk) with
+    c = ``bike_gradient_penalty`` from the profile. c = 0 (default) reproduces
+    the original flat-course model exactly. Calibrated jointly with k_E on the
+    athlete's three real races: c = 0.014 per m/km.
+    """
     m3 = profile["model3"]
     thr = profile["thresholds"]
     ftp = ftp_watts if ftp_watts is not None else thr["bike_ftp_watts"]
 
     v_swim_thr = _pace_to_kmh(m3["swim_threshold_pace_per_100m"], 100) / 60.0   # km/min
     v_run_thr = _pace_to_kmh(thr["run_threshold_pace"], 1000) / 60.0
-    v_bike_ftp_ref = m3["bike_speed_at_ftp_kmh"] / 60.0
+    c_grad = m3.get("bike_gradient_penalty", 0.0)
+    grade_factor = max(0.25, 1.0 - c_grad * gradient_m_per_km)
+    v_bike_ftp_ref = m3["bike_speed_at_ftp_kmh"] * grade_factor / 60.0
     ftp_ref = thr["bike_ftp_watts"]
 
     rows = []
@@ -92,7 +103,8 @@ def build_model(profile: dict, ctl_race_day: float,
                 fueling_kj_min: float | None = None,
                 fueling_decision: bool = False,
                 atl_race_day: float = 0.0,
-                fatigue_lambda: float | None = None) -> tuple[pulp.LpProblem, dict]:
+                fatigue_lambda: float | None = None,
+                gradient_m_per_km: float = 0.0) -> tuple[pulp.LpProblem, dict]:
     """In-race carbohydrate intake, two modes.
 
     Fixed rate (``fueling_kj_min`` = r): intake at r kJ/min reduces every
@@ -109,7 +121,7 @@ def build_model(profile: dict, ctl_race_day: float,
     (a 5-6 h race is not ridden on stored glycogen alone)."""
     m3 = profile["model3"]
     r = fueling_kj_min if fueling_kj_min is not None else m3.get("in_race_fueling_kj_per_min", 0.0)
-    zp = zone_parameters(profile, ftp_watts)
+    zp = zone_parameters(profile, ftp_watts, gradient_m_per_km)
     s = {(r.leg, r.zone): r.speed_km_min for r in zp.itertuples()}
     e = {(r.leg, r.zone): r.energy_kj_min for r in zp.itertuples()}
     d = m3["distances_km"]

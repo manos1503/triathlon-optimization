@@ -627,7 +627,7 @@ race-day CTL --- fitness is the binding resource up to CTL $\approx 85$.}
 \subsection{Validation against real races}
 
 The author raced the \emph{Epidavros Standard Triathlon} (Olympic distance) on
-6 September 2025, finishing in 2:43:26. The training data pipeline reconstructs
+7 September 2025, finishing in 2:43:26. The training data pipeline reconstructs
 the fitness state on that day: $\text{CTL}=55.6$, $\text{TSB}=-14$ --- far below
 the model's assumed optimal preparation ($\text{CTL}=81.6$, $\text{TSB}=+35$),
 so the prediction and the result are compared leg by leg rather than in total
@@ -665,9 +665,9 @@ constant, and all energy-related duals scale by the same factor
 ($\approx 142/115$) under the recalibration.
 
 A second, more recent race probes a different problem size: the
-\emph{Spetsathlon 2026} (25 April 2026; non-standard sprint --- 750\,m swim,
+\emph{Spetsathlon 2026} (17 May 2026; non-standard sprint --- 750\,m swim,
 25\,km hilly bike, 4.75\,km run), finished in 1:24:28 at a reconstructed
-race-day state of $\text{CTL}=59$, $\text{TSB}\approx 0$. Model~3 re-solved on
+race-day state of $\text{CTL}=64.9$, $\text{TSB}\approx 0$. Model~3 re-solved on
 this course geometry predicts 79.7 min vs.\ 84.5 actual
 (Table~\ref{tab:race2}).
 
@@ -751,7 +751,7 @@ reconstructed fitness.
 & & \multicolumn{2}{c}{Swim} & \multicolumn{2}{c}{Bike} & \multicolumn{2}{c}{Run}\\
 Race & CTL & model & actual & model & actual & model & actual\\
 \midrule
-Spetsathlon 2026 (sprint$^\ast$) & 59.0 & 12.9 & 13.2 & 44.4 & 50.9 & 18.9 & 17.7\\
+Spetsathlon 2026 (sprint$^\ast$) & 64.9 & 12.9 & 13.2 & 44.4 & 50.9 & 18.9 & 17.7\\
 Epidavros 2025 (Olympic) & 55.6 & 27.6 & 25.8 & 83.7 & 91.5 & 43.1 & 42.0\\
 IM 70.3 Costa Navarino 2025 (fueled) & 71.4 & 33.3 & 32.9 & 181.1 & 180.3 & 86.3 & 115.2\\
 \bottomrule
@@ -761,6 +761,48 @@ actual race-day fitness. $^\ast$non-standard course. Consistent misses:
 hilly-course bike speed (sprint, Olympic) and within-leg run fatigue (70.3).}
 \label{tab:threeraces}
 \end{table}
+
+\paragraph{Correcting the bike: a course-gradient speed curve.} The bike misses
+above share a signature: they are large on Epidavros and Spetsathlon and
+negligible on Costa Navarino, and they all have the same sign. Retrieving the
+GPS climbing of each bike leg from the raw export explains why --- the two
+courses the model gets wrong climb $15.5$ and $15.2$ m/km, the one it gets right
+climbs $9.1$. The flat time-trial assumption behind ``35 km/h at FTP'' is the
+single faulty parameter.
+
+Replacing it costs one multiplier: the reference speed becomes
+$v_{\text{FTP}}(1 - c\,\gamma)$ with $\gamma$ the course's metres of climbing per
+km. Fitting $c$ jointly with $k_E$ on the three races gives $c = 0.014$ and
+$k_E = 190$ --- the energy constant rises because it is no longer silently
+absorbing the hills it was calibrated on.
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{lrrrr}
+\toprule
+Bike leg & m/km & flat model & gradient model & actual\\
+\midrule
+Spetsathlon (24.4 km) & 15.2 & 43.3 & 55.0 & 50.9\\
+Epidavros (38.7 km) & 15.5 & 78.9 & 87.7 & 91.5\\
+Costa Navarino (88.5 km) & 9.1 & 177.5 & 180.0 & 180.3\\
+\midrule
+\multicolumn{2}{l}{total absolute error} & 23.0 min & \textbf{8.2 min} & \\
+\multicolumn{2}{l}{errors all of one sign} & yes (biased) & \textbf{no} & \\
+\bottomrule
+\end{tabular}
+\caption{Flat versus gradient-aware bike speed. The correction cuts the error
+by two thirds, and removes its systematic sign: the flat model is slow on every
+course, the gradient model errs in both directions.}
+\label{tab:gradient}
+\end{table}
+
+Halving the error matters less than losing the bias. A model that is wrong in
+one direction on every course has a missing term; one that is wrong in both
+directions by a similar amount has residual noise. The correction is shipped
+disabled ($c = 0$), so every other result in this report is unaffected, and it
+is reported here as an alternative formulation rather than as the baseline ---
+three races are enough to expose a systematic error, but not enough to claim a
+validated coefficient.
 
 \section{Cross-Model Sensitivity Analysis}
 \label{sec:sensitivity}
