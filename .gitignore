@@ -23,7 +23,8 @@ venv/
 *.snm
 *.vrb
 
-# Speaker-notes build of the deck (Greek, personal rehearsal aid)
+# Speaker notes (Greek, personal rehearsal aid) and their build
+presentation/speaker-notes.tex
 presentation/presentation-notes.pdf
 
 # Course material from the instructor (not ours to redistribute)

@@ -1,6 +1,8 @@
 # Triathlon Optimization
 
-**Optimal Athletic Programming in Triathlon using Linear and Integer Programming**
+**Optimal Resource Allocation and Scheduling of Athletic Activities, with an Application to Triathlon**
+
+*Linear and 0–1 Integer Programming models for training load, race calendar and race pacing*
 
 ## Author
 
@@ -130,8 +132,9 @@ cd report       && pdflatex report.tex && pdflatex report.tex
 cd presentation && pdflatex presentation.tex && pdflatex presentation.tex
 ```
 
-The deck also carries the speaker notes. They are in Greek, so that build needs
-XeLaTeX and is not committed — it is a private rehearsal aid:
+The deck can also be built with the speaker notes shown. The notes live in
+`presentation/speaker-notes.tex`; they are in Greek, are a personal rehearsal
+aid, and are not tracked, so the deck compiles with or without them:
 
 ```bash
 cd presentation && xelatex -jobname=presentation-notes '\def\shownotes{}\input{presentation}'
