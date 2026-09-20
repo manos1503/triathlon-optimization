@@ -19,6 +19,12 @@ venv/
 *.out
 *.toc
 *.synctex.gz
+*.nav
+*.snm
+*.vrb
+
+# Speaker-notes build of the deck (Greek, personal rehearsal aid)
+presentation/presentation-notes.pdf
 
 # Course material from the instructor (not ours to redistribute)
 *_eclass.pdf
