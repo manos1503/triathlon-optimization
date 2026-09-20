@@ -1,11 +1,19 @@
 """Model 3 validated against the athlete's three real races.
 
 Race days were identified in the raw Strava export as the only three days
-containing a swim, a bike and a run; distances and bike climbing are the
-GPS-recorded values, and race-day fitness is the CTL/ATL of the preceding day
-from the data pipeline. Swim distances use the NOMINAL race distance rather
-than the GPS value, because open-water GPS drift inflates it substantially
-(2.26 km recorded for a 1.5 km swim).
+containing a swim, a bike and a run. Race-day fitness is the CTL/ATL of the
+preceding day from the data pipeline.
+
+DISTANCES USE THE OFFICIAL RACE DISTANCE, NOT THE GPS TRACE. Open-water GPS
+drift inflates the swim badly (2.26 km recorded for a 1.5 km leg, because the
+watch loses signal underwater), and the bike trace reads short on all three
+courses by 1.7-3.3% -- a consistent under-read rather than three short courses.
+Only the bike CLIMBING is taken from the trace, where GPS/barometer is reliable.
+
+The choice matters: fitting the gradient coefficient on GPS distances gives
+c = 0.014, on official distances c = 0.008. That factor-of-two spread is
+itself a reason to report the correction as an alternative formulation rather
+than a calibrated constant.
 
     Epidavros 2025      7 Sep 2025   CTL 55.6   bike 15.5 m/km
     Costa Navarino 70.3 26 Oct 2025  CTL 71.4   bike  9.1 m/km
@@ -16,7 +24,7 @@ Two model variants are compared:
     flat      the baseline speed curve (35 km/h at FTP on a flat course)
     gradient  reference speed scaled by (1 - c * m/km), c = 0.014
 
-c and k_E were fitted jointly on the three races. The gradient variant roughly
+c and k_E were fitted jointly on the three races (official distances). The gradient variant roughly
 halves the total bike error, and — more importantly — removes its systematic
 sign: the flat model is slow on every course, the gradient model errs in both
 directions.
@@ -36,17 +44,17 @@ from src.models.model3_pacing import build_model, extract_solution, solve
 from .common import TABLES, load_inputs
 
 K_E_FLAT = 142       # calibrated on Epidavros with the flat speed curve
-K_E_GRADIENT = 190   # re-calibrated jointly with the gradient penalty
-C_GRADIENT = 0.014   # speed loss per metre of climbing per km
+K_E_GRADIENT = 160   # re-calibrated jointly with the gradient penalty
+C_GRADIENT = 0.008   # speed loss per metre of climbing per km
 
 RACES = [
     # name, date, CTL, ATL, distances (swim nominal), bike m/km, fuelling, actual legs
     ("Spetsathlon 2026 (sprint*)", "2026-05-17", 64.94, 64.49,
-     {"swim": 0.75, "bike": 24.40, "run": 4.70}, 15.2, 0.0, (13.2, 50.9, 17.7)),
+     {"swim": 0.75, "bike": 25.00, "run": 5.00}, 15.2, 0.0, (13.2, 50.9, 17.7)),
     ("Epidavros 2025 (Olympic)", "2025-09-07", 55.60, 64.06,
-     {"swim": 1.50, "bike": 38.69, "run": 9.22}, 15.5, 0.0, (25.8, 91.5, 42.0)),
+     {"swim": 1.50, "bike": 40.00, "run": 10.00}, 15.5, 0.0, (25.8, 91.5, 42.0)),
     ("IM 70.3 Costa Navarino 2025", "2025-10-26", 71.40, 58.56,
-     {"swim": 1.90, "bike": 88.46, "run": 21.13}, 9.1, 21.0, (32.9, 180.3, 115.2)),
+     {"swim": 1.90, "bike": 90.00, "run": 21.10}, 9.1, 21.0, (32.9, 180.3, 115.2)),
 ]
 
 
