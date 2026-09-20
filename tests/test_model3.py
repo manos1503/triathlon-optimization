@@ -115,3 +115,32 @@ def test_fueling_extension():
     prob_b, _ = build_model(PROFILE, ctl_race_day=81.6, fueling_kj_min=0.0)
     assert solve(prob_a) == solve(prob_b) == "Optimal"
     assert pulp.value(prob_a.objective) == pytest.approx(pulp.value(prob_b.objective))
+
+
+def test_gradient_penalty_slows_the_bike():
+    """A hilly course must be slower than a flat one, all else equal."""
+    from src.models.model3_pacing import zone_parameters
+    import copy
+    p = copy.deepcopy(PROFILE)
+    p["model3"]["bike_gradient_penalty"] = 0.014
+    flat = zone_parameters(p, gradient_m_per_km=0.0)
+    hilly = zone_parameters(p, gradient_m_per_km=15.0)
+    fb = flat[flat.leg == "bike"]["speed_km_min"].to_numpy()
+    hb = hilly[hilly.leg == "bike"]["speed_km_min"].to_numpy()
+    assert (hb < fb).all()
+    # swim and run are untouched by a bike gradient
+    for leg in ("swim", "run"):
+        a = flat[flat.leg == leg]["speed_km_min"].to_numpy()
+        b = hilly[hilly.leg == leg]["speed_km_min"].to_numpy()
+        assert (a == b).all()
+
+
+def test_gradient_default_is_inert():
+    """With the shipped default (c = 0) the model is bit-identical."""
+    import copy, pulp
+    p = copy.deepcopy(PROFILE)
+    p["model3"]["bike_gradient_penalty"] = 0.0
+    a, _ = build_model(p, ctl_race_day=81.6, gradient_m_per_km=0.0)
+    b, _ = build_model(p, ctl_race_day=81.6, gradient_m_per_km=15.0)
+    assert solve(a) == solve(b) == "Optimal"
+    assert pulp.value(a.objective) == pytest.approx(pulp.value(b.objective))

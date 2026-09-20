@@ -1,15 +1,25 @@
 """Model 3 validated against the athlete's three real races.
 
-Three races at three distances, with race-day fitness reconstructed from the
-data pipeline, probe different parts of the model:
+Race days were identified in the raw Strava export as the only three days
+containing a swim, a bike and a run; distances and bike climbing are the
+GPS-recorded values, and race-day fitness is the CTL/ATL of the preceding day
+from the data pipeline. Swim distances use the NOMINAL race distance rather
+than the GPS value, because open-water GPS drift inflates it substantially
+(2.26 km recorded for a 1.5 km swim).
 
-    Spetsathlon 2026 (sprint*)   CTL 59.0  -- speed caps bind, energy slack
-    Epidavros 2025 (Olympic)     CTL 55.6  -- energy budget binds
-    IM 70.3 Costa Navarino 2025  CTL 71.4  -- infeasible WITHOUT in-race fueling
+    Epidavros 2025      7 Sep 2025   CTL 55.6   bike 15.5 m/km
+    Costa Navarino 70.3 26 Oct 2025  CTL 71.4   bike  9.1 m/km
+    Spetsathlon 2026    17 May 2026  CTL 64.9   bike 15.2 m/km
 
-The 70.3 requires the fueling extension: intake at r kJ/min gives net drain
-sum (e - r) t <= E_tot (still an LP). r = 21 kJ/min (~75 g carbs/h, the
-standard guideline) reproduces the actual swim and bike within one minute.
+Two model variants are compared:
+
+    flat      the baseline speed curve (35 km/h at FTP on a flat course)
+    gradient  reference speed scaled by (1 - c * m/km), c = 0.014
+
+c and k_E were fitted jointly on the three races. The gradient variant roughly
+halves the total bike error, and — more importantly — removes its systematic
+sign: the flat model is slow on every course, the gradient model errs in both
+directions.
 
 Usage:
     python -m src.analysis.race_validation
@@ -17,54 +27,70 @@ Usage:
 
 from __future__ import annotations
 
+import copy
+
 import pandas as pd
-import pulp
 
 from src.models.model3_pacing import build_model, extract_solution, solve
 
 from .common import TABLES, load_inputs
 
-K_E = 142   # energy constant calibrated on Epidavros (a priori value: 115)
+K_E_FLAT = 142       # calibrated on Epidavros with the flat speed curve
+K_E_GRADIENT = 190   # re-calibrated jointly with the gradient penalty
+C_GRADIENT = 0.014   # speed loss per metre of climbing per km
 
 RACES = [
-    # name, date, ctl, distances, fueling kJ/min, actual legs (min): swim/bike/run
-    ("Spetsathlon 2026 (sprint*)", "2026-04-25", 59.0,
-     {"swim": 0.75, "bike": 25.0, "run": 4.75}, 0.0, (13.2, 50.9, 17.7)),
-    ("Epidavros 2025 (Olympic)", "2025-09-06", 55.6,
-     {"swim": 1.5, "bike": 40.0, "run": 10.0}, 0.0, (25.8, 91.5, 42.0)),
-    ("IM 70.3 Costa Navarino 2025", "2025-10-26", 71.4,
-     {"swim": 1.9, "bike": 90.0, "run": 21.1}, 21.0, (32.9, 180.3, 115.2)),
+    # name, date, CTL, ATL, distances (swim nominal), bike m/km, fuelling, actual legs
+    ("Spetsathlon 2026 (sprint*)", "2026-05-17", 64.94, 64.49,
+     {"swim": 0.75, "bike": 24.40, "run": 4.70}, 15.2, 0.0, (13.2, 50.9, 17.7)),
+    ("Epidavros 2025 (Olympic)", "2025-09-07", 55.60, 64.06,
+     {"swim": 1.50, "bike": 38.69, "run": 9.22}, 15.5, 0.0, (25.8, 91.5, 42.0)),
+    ("IM 70.3 Costa Navarino 2025", "2025-10-26", 71.40, 58.56,
+     {"swim": 1.90, "bike": 88.46, "run": 21.13}, 9.1, 21.0, (32.9, 180.3, 115.2)),
 ]
 
 
-def predict(profile: dict, ctl: float, distances: dict, fueling: float):
-    import copy
+def predict(profile: dict, ctl: float, distances: dict, gpk: float,
+            fuelling: float, gradient: bool):
     p = copy.deepcopy(profile)
     p["model3"]["distances_km"] = distances
-    p["model3"]["energy_budget_kj_per_ctl"] = K_E
-    prob, v = build_model(p, ctl_race_day=ctl, fueling_kj_min=fueling)
+    p["model3"]["energy_budget_kj_per_ctl"] = K_E_GRADIENT if gradient else K_E_FLAT
+    p["model3"]["bike_gradient_penalty"] = C_GRADIENT if gradient else 0.0
+    prob, v = build_model(p, ctl_race_day=ctl, fueling_kj_min=fuelling,
+                          gradient_m_per_km=gpk if gradient else 0.0)
     if solve(prob) != "Optimal":
         return None
-    sol = extract_solution(prob, v)
-    return sol["leg_times"]
+    return extract_solution(prob, v)["leg_times"]
 
 
 if __name__ == "__main__":
     profile, _, _ = load_inputs()
     rows = []
-    for name, date, ctl, dist, fuel, (a_swim, a_bike, a_run) in RACES:
-        lt = predict(profile, ctl, dist, fuel)
+    for name, date, ctl, atl, dist, gpk, fuel, (a_sw, a_bk, a_rn) in RACES:
+        flat = predict(profile, ctl, dist, gpk, fuel, gradient=False)
+        grad = predict(profile, ctl, dist, gpk, fuel, gradient=True)
         rows.append({
-            "race": name, "date": date, "ctl": ctl, "fueling_kj_min": fuel,
-            "swim_model": round(lt["swim"], 1), "swim_actual": a_swim,
-            "bike_model": round(lt["bike"], 1), "bike_actual": a_bike,
-            "run_model": round(lt["run"], 1), "run_actual": a_run,
+            "race": name, "date": date, "ctl": ctl, "bike_m_per_km": gpk,
+            "swim_model": round(grad["swim"], 1) if grad is not None else None,
+            "swim_actual": a_sw,
+            "bike_flat": round(flat["bike"], 1) if flat is not None else None,
+            "bike_gradient": round(grad["bike"], 1) if grad is not None else None,
+            "bike_actual": a_bk,
+            "run_model": round(grad["run"], 1) if grad is not None else None,
+            "run_actual": a_rn,
         })
     df = pd.DataFrame(rows)
     df.to_csv(TABLES / "model3_race_validation.csv", index=False)
+
     print(df.to_string(index=False))
 
-    # the 70.3 is infeasible without fueling -- demonstrate
-    lt = predict(profile, 71.4, {"swim": 1.9, "bike": 90.0, "run": 21.1}, 0.0)
-    print(f"\n70.3 without in-race fueling: "
-          f"{'feasible' if lt is not None else 'INFEASIBLE (as expected)'}")
+    def total_err(col):
+        d = df.dropna(subset=[col])
+        return (d[col] - d["bike_actual"]).abs().sum()
+
+    print(f"\n[validation] bike error, flat model:     {total_err('bike_flat'):5.1f} min")
+    print(f"[validation] bike error, gradient model: {total_err('bike_gradient'):5.1f} min")
+    signs = [(r["bike_flat"] or 0) - r["bike_actual"] for _, r in df.iterrows()]
+    print(f"[validation] flat errors all same sign:  {all(s < 0 for s in signs)}")
+    signs_g = [(r["bike_gradient"] or 0) - r["bike_actual"] for _, r in df.iterrows()]
+    print(f"[validation] gradient errors mixed sign: {not all(s < 0 for s in signs_g)}")
