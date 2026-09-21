@@ -133,14 +133,6 @@ cd report       && pdflatex report.tex && pdflatex report.tex
 cd presentation && pdflatex presentation.tex && pdflatex presentation.tex
 ```
 
-The deck can also be built with the speaker notes shown. The notes live in
-`presentation/speaker-notes.tex`; they are in Greek, are a personal rehearsal
-aid, and are not tracked, so the deck compiles with or without them:
-
-```bash
-cd presentation && xelatex -jobname=presentation-notes '\def\shownotes{}\input{presentation}'
-```
-
 Without the personal Strava export (`data/raw/activities.csv`, not committed),
 the pipeline step is skipped and the committed processed data is used.
 
