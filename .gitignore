@@ -34,3 +34,6 @@ intro-numpy-linalg-matplotlib-*.pdf
 
 # Local working notes / imported project instructions (contain private correspondence)
 AGENTS.md
+
+# Figures written by the HW1 scripts when they run
+homework/HW1/code/*.png
