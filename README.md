@@ -98,6 +98,7 @@ tests/             60 tests (models, duality theorems, analyses)
 results/           Figures, tables and captured solver output
 report/            Final report (15 pp + appendices with code and output)
 presentation/      Slides (~20 min)
+homework/          Course assignments 1 & 2 — independent of the project
 ```
 
 ---
