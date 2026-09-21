@@ -171,12 +171,21 @@ $\cdot$ taper caps
 
 % ---------------------------------------------------------------- model 2
 \begin{frame}{Model 2 --- race-calendar selection (0--1 MIP)}
-\textbf{17 candidate races}, binary $x_i$
+\textbf{17 candidate races}, binary $x_i \in \{0,1\}$
+\vspace{-4pt}
 \[
-\max \sum_i \underbrace{q_i(\alpha\,\text{pts}_i + \beta\,\text{strat}_i
-+ \gamma\,\text{enj}_i + \varphi\,\text{fit}_i)}_{\text{weather-risk-adjusted value}} x_i
+\max \sum_i \underbrace{q_i}_{\substack{\text{P(not ruined}\\ \text{by weather)}}}
+\bigl(\,1\cdot\text{pts}_i + 3\cdot\text{strat}_i + 2\cdot\text{enj}_i
++ 2\cdot\text{fit}_i\,\bigr)\, x_i
 \]
-\begin{itemize}\itemsep6pt
+\vspace{-16pt}
+\begin{center}\small
+$\text{enj}_i = 0.3\,\text{org} + 0.3\,\text{scenery} + 0.4\,\text{swim}$\\[3pt]
+$\text{fit}_i = \tfrac12 f(\text{bike}) + \tfrac12 f(\text{run})$,\quad
+$f = 10\bigl(1 - \min(g,15)/15\bigr)$,\quad $g = $ metres climbed per km
+\end{center}
+\vspace{-2pt}
+\begin{itemize}\itemsep5pt
   \item \textbf{two knapsacks:} $\le 2500$ EUR, $\le 12$ vacation days
   \item \textbf{recovery spacing:} $x_i + x_j \le 1$; $\le 2$ races/month; $\ge 1$ A-race
   \item \textbf{readiness gate from Model 1:} projected CTL must reach the class minimum
