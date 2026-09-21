@@ -80,14 +80,19 @@ def main():
     # 3. analyses + figures
     import subprocess
     import sys
+    # every module that writes to results/ must be listed here, or its output
+    # silently goes stale while `run_all` still reports no drift
     for mod in ("src.analysis.plot_model1", "src.analysis.plot_model2",
                 "src.analysis.plot_model3", "src.analysis.rhs_ranging",
                 "src.analysis.cost_ranging",
                 "src.analysis.shadow_prices", "src.analysis.alt_optima",
-                "src.analysis.heuristic_benchmark", "src.analysis.ftp_sweep",
+                "src.analysis.heuristic_benchmark",
+                "src.analysis.actual_vs_optimal", "src.analysis.ftp_sweep",
                 "src.analysis.distance_scenarios", "src.analysis.budget_sweep",
-                "src.analysis.k2_sensitivity",
-                "src.analysis.coherence", "src.analysis.pipeline_loop"):
+                "src.analysis.k2_sensitivity", "src.analysis.clique_cuts",
+                "src.analysis.network_flow", "src.analysis.race_validation",
+                "src.analysis.coherence", "src.analysis.pipeline_loop",
+                "src.analysis.simplex_toy"):
         timed(mod, lambda m=mod: subprocess.run([sys.executable, "-m", m], check=True))
 
     df = pd.DataFrame(sizes)
